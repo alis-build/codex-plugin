@@ -1,6 +1,6 @@
 {
   "name": "alis-build",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Connect Codex to Alis Build through MCP tools and workspace context.",
   "author": {
     "name": "Alis Build"
@@ -13,8 +13,8 @@
     "longDescription": "Connect Codex to Alis Build through MCP tools, OAuth authentication, and workspace-aware build and deploy operations.",
     "developerName": "Alis Build",
     "category": "Developer Tools",
-    "composerIcon": "assets/logo.svg",
-    "logo": "assets/logo.svg",
+    "composerIcon": "assets/alis.svg",
+    "logo": "assets/alis.svg",
     "capabilities": ["Read", "Write"],
     "defaultPrompt": [
       "Use Alis Build to inspect the current workspace and build status.",
