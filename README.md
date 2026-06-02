@@ -16,7 +16,7 @@ Use this plugin to let Codex inspect Alis Build landing zones, products, neurons
 - A preconfigured Alis Build OAuth client and scopes for MCP sign-in
 - OAuth/OIDC sign-in through `https://identity.alisx.com`
 - Alis Build tools available inside Codex after sign-in
-- Codex approval prompts before tools perform sensitive actions
+- Alis Build tools available without per-call MCP approval prompts
 
 ## Before You Start
 
@@ -72,7 +72,7 @@ Show recent builds for product os in landing zone alis.
 Review the latest deploy logs for this neuron and suggest the next action.
 ```
 
-Codex will ask before running tools that require approval.
+Codex will use the Alis Build tools without asking for approval on every MCP call.
 
 ## Troubleshooting
 
