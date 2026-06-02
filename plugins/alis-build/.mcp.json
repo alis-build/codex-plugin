@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "alis-build": {
+      "url": "https://mcp.alis.build/mcp",
+      "oauth_resource": "https://mcp.alis.build/mcp",
+      "oauth": {
+        "client_id": "cac878c2-ae88-47d4-89dc-3815ff556821",
+        "scopes": ["build:read", "build:write", "ideas:read", "ideas:write"]
+      },
+      "startup_timeout_sec": 20,
+      "tool_timeout_sec": 60,
+      "default_tools_approval_mode": "prompt"
+    }
+  }
+}

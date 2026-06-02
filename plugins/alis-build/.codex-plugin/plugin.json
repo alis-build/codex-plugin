@@ -1,0 +1,24 @@
+{
+  "name": "alis-build",
+  "version": "0.1.0",
+  "description": "Connect Codex to Alis Build through MCP tools and workspace context.",
+  "author": {
+    "name": "Alis Build"
+  },
+  "repository": "https://github.com/alis-build/codex-plugin",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Alis Build",
+    "shortDescription": "Connect Codex to Alis Build through MCP.",
+    "longDescription": "Connect Codex to Alis Build through MCP tools, OAuth authentication, and workspace-aware build and deploy operations.",
+    "developerName": "Alis Build",
+    "category": "Developer Tools",
+    "composerIcon": "assets/logo.svg",
+    "logo": "assets/logo.svg",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Use Alis Build to inspect the current workspace and build status.",
+      "Use Alis Build to review recent build failures and suggest the next action."
+    ]
+  }
+}
