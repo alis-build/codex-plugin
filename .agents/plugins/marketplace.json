@@ -1,14 +1,14 @@
 {
-  "name": "alis",
+  "name": "alis-build",
   "interface": {
-    "displayName": "Alis"
+    "displayName": "Alis Build"
   },
   "plugins": [
     {
-      "name": "alis-build",
+      "name": "tools",
       "source": {
         "source": "local",
-        "path": "./plugins/alis-build"
+        "path": "./plugins/tools"
       },
       "policy": {
         "installation": "AVAILABLE",
