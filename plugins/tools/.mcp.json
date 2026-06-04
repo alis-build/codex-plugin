@@ -5,7 +5,7 @@
       "oauth_resource": "https://mcp.alis.build",
       "oauth": {
         "client_id": "15e7025c-e6cf-4216-99a7-abe28319f249",
-        "scopes": ["build:read", "build:write", "ideas:read", "ideas:write"]
+        "scopes": ["build:read", "build:write"]
       },
       "startup_timeout_sec": 20,
       "tool_timeout_sec": 60,

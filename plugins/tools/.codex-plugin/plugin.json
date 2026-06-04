@@ -1,24 +1,30 @@
 {
   "name": "tools",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Connect Codex to Alis Build through MCP tools and workspace context.",
   "author": {
     "name": "Alis Build"
   },
+  "homepage": "https://github.com/alis-build/codex-plugin",
   "repository": "https://github.com/alis-build/codex-plugin",
+  "license": "MIT",
+  "keywords": ["alis-build", "mcp", "builds", "deploys", "workspaces"],
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Alis Build",
-    "shortDescription": "Connect Codex to Alis Build through MCP.",
-    "longDescription": "Connect Codex to Alis Build through MCP tools, OAuth authentication, and workspace-aware build and deploy operations.",
+    "shortDescription": "Inspect Alis Build workspaces, builds, and deploys from Codex.",
+    "longDescription": "Connect Codex to Alis Build through hosted MCP tools, OAuth authentication, and workspace-aware build and deploy operations.",
     "developerName": "Alis Build",
     "category": "Developer Tools",
+    "brandColor": "#F02222",
     "composerIcon": "assets/alis.svg",
     "logo": "assets/alis.svg",
+    "screenshots": ["assets/connectivity.svg"],
     "capabilities": ["Read", "Write"],
     "defaultPrompt": [
-      "Use Alis Build to inspect the current workspace and build status.",
-      "Use Alis Build to review recent build failures and suggest the next action."
+      "Use Alis Build to list the landing zones I can access.",
+      "Use Alis Build to inspect the current workspace, product, active neurons, and recent build status.",
+      "Use Alis Build to review the latest failed build or deploy logs and suggest the next action."
     ]
   }
 }
