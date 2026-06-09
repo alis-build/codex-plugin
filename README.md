@@ -69,12 +69,12 @@ Codex will use the Alis Build tools without asking for approval on every MCP cal
 This plugin includes Alis Build workflow skills:
 
 ```text
-Use the Alis Build - Gettting Started skill to help me get started on Alis Build.
-Use the Alis Build - Agents skill to add a synchronous tool to this ADK-Go agent.
-Use the Alis Build - Agents skill to enable AG-UI for this ADK-Go agent.
-Use the Alis Build - Agents skill to add runtime agent skills to this ADK-Go agent.
-Use the Alis Build - Agents skill to add a long-running ADK tool to this agent.
-Use the Alis Build - Agents skill to add the scheduler extension to this ADK-Go agent.
+Use the Alis Build - Getting Started skill to help me get started on Alis Build.
+Use the ADK-Go Agent Workflows skill to add a synchronous tool to this ADK-Go agent.
+Use the ADK-Go Agent Workflows skill to enable AG-UI support for this ADK-Go agent.
+Use the ADK-Go Agent Workflows skill to add runtime agent skills to this ADK-Go agent.
+Use the ADK-Go Agent Workflows skill to add a long-running ADK tool to this agent.
+Use the ADK-Go Agent Workflows skill to add scheduler support to this ADK-Go agent.
 ```
 
 ## Troubleshooting
