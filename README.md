@@ -51,6 +51,14 @@ You should see `alis-build` listed as an MCP server.
 After sign-in, ask Codex to use Alis Build:
 
 ```text
+build it
+```
+
+```text
+fix it
+```
+
+```text
 Use Alis Build to list the landing zones I can access.
 ```
 
@@ -69,13 +77,12 @@ Codex will use the Alis Build tools without asking for approval on every MCP cal
 This plugin includes Alis Build workflow skills:
 
 ```text
+build it
+fix it
 Use the Alis Build - Getting Started skill to help me get started on Alis Build.
-Use the ADK-Go Agent Workflows skill to add a synchronous tool to this ADK-Go agent.
-Use the ADK-Go Agent Workflows skill to enable AG-UI support for this ADK-Go agent.
-Use the ADK-Go Agent Workflows skill to add runtime agent skills to this ADK-Go agent.
-Use the ADK-Go Agent Workflows skill to add a long-running ADK tool to this agent.
-Use the ADK-Go Agent Workflows skill to add scheduler support to this ADK-Go agent.
 ```
+
+`build it` discovers the right Alis Build skill for the thing you want to build. `fix it` is an alias for the same discovery flow when the goal is framed as a fix.
 
 ## Troubleshooting
 

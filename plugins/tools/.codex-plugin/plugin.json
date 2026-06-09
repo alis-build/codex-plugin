@@ -1,6 +1,6 @@
 {
   "name": "tools",
-  "version": "0.1.10",
+  "version": "0.2.0",
   "description": "Connect Codex to Alis Build through MCP tools and workspace context.",
   "author": {
     "name": "Alis Build"
@@ -22,6 +22,8 @@
     "screenshots": ["assets/connectivity.svg"],
     "capabilities": ["Read", "Write"],
     "defaultPrompt": [
+      "build it",
+      "fix it",
       "Use Alis Build to list the landing zones I can access.",
       "Use the Alis Build MCP and the getting-started skill to help me get started building on the Alis Build platform.",
       "Use Alis Build to inspect the current workspace, product, active neurons, and recent build status.",
