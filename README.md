@@ -28,25 +28,15 @@ You need:
 
 ## Install
 
-Add the Alis plugin marketplace:
+Install the Alis Build plugin and sign in:
 
 ```sh
-codex plugin marketplace add https://github.com/alis-build/codex-plugin.git --sparse .agents/plugins --sparse plugins/tools
+codex plugin marketplace add alis-build/codex-plugin && codex plugin add tools@alis-build && codex mcp login alis-build && codex
 ```
 
-Install the Alis Build plugin:
-
-```sh
-codex plugin add tools@alis-build
-```
+The sign-in flow opens `https://identity.alisx.com` in your browser.
 
 ## Sign In
-
-Authenticate with Alis Build:
-
-```sh
-codex mcp login alis-build
-```
 
 In Codex, run:
 
@@ -54,7 +44,7 @@ In Codex, run:
 /mcp
 ```
 
-You should see `alis-build` listed as an MCP server. The sign-in flow opens `https://identity.alisx.com` in your browser.
+You should see `alis-build` listed as an MCP server.
 
 ## Use It
 
@@ -73,6 +63,19 @@ Review the latest deploy logs for this neuron and suggest the next action.
 ```
 
 Codex will use the Alis Build tools without asking for approval on every MCP call.
+
+## Workflow Skills
+
+This plugin includes Alis Build workflow skills:
+
+```text
+Use the getting-started skill to help me get started on Alis Build.
+Use the adk-go-agent-workflows skill to add a synchronous tool to this ADK-Go agent.
+Use the adk-go-agent-workflows skill to enable AG-UI for this ADK-Go agent.
+Use the adk-go-agent-workflows skill to add runtime agent skills to this ADK-Go agent.
+Use the adk-go-agent-workflows skill to add a long-running ADK tool to this agent.
+Use the adk-go-agent-workflows skill to add the scheduler extension to this ADK-Go agent.
+```
 
 ## Troubleshooting
 
