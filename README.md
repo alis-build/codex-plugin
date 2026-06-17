@@ -17,6 +17,7 @@ Use this plugin to let Codex inspect Alis Build landing zones, products, neurons
 - OAuth/OIDC sign-in through `https://identity.alisx.com`
 - Alis Build tools available inside Codex after sign-in
 - Alis Build tools available without per-call MCP approval prompts
+- Workspace-aware context injection through Codex hooks
 
 ## Before You Start
 
@@ -83,6 +84,19 @@ Use the Alis Build - Getting Started skill to help me get started on Alis Build.
 ```
 
 `build it` discovers the right Alis Build skill for the thing you want to build. `fix it` is an alias for the same discovery flow when the goal is framed as a fix.
+
+## Workspace Context
+
+This plugin ships Codex hooks that keep sessions grounded in the Alis Build workflow:
+
+- **Define → Build → Deploy primer.** When you start (or resume) a session inside an Alis Build
+  workspace (`~/alis.build/...`), the plugin injects a short Define → Build → Deploy primer so Codex
+  frames help around the platform lifecycle. Sessions outside an Alis Build workspace are unaffected.
+- **Session-aware skills.** When Codex loads an Alis Build skill, the plugin enriches the request with
+  the active session so the server can return runtime context for your current workspace.
+
+Hooks are enabled by default in Codex. If you have disabled them globally, re-enable them by removing
+`[features].hooks = false` from `~/.codex/config.toml`.
 
 ## Troubleshooting
 

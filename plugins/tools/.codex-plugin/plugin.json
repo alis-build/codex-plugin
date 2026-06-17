@@ -1,6 +1,6 @@
 {
   "name": "tools",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Connect Codex to Alis Build through MCP tools and workspace context.",
   "author": {
     "name": "Alis Build"
@@ -10,6 +10,7 @@
   "license": "MIT",
   "keywords": ["alis-build", "mcp", "builds", "deploys", "workspaces"],
   "mcpServers": "./.mcp.json",
+  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "Alis Build",
     "shortDescription": "Inspect Alis Build workspaces, builds, and deploys from Codex.",
