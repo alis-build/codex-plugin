@@ -4,10 +4,18 @@ The core workflow on the Alis Build platform is **Define, Build, Deploy (DBD)**.
 development flows touch one or more of these steps — use this framing when helping with any
 Alis Build task, and walk the user through DBD rather than handing over a disconnected checklist.
 
+> **How this fits with the tools.** This primer is the shared mental model — *what*
+> DBD is and *where* things live on disk. The precise rules for *calling* the Alis
+> Build tools (which arguments to pass, what never to do) live in the tools
+> themselves — their MCP server instructions and each tool's description. When a
+> tool instruction is more specific than this primer, follow the tool instruction.
+
 ## Define — lock the API / platform contract
 
 - Edit protobuf files in the landing zone `define` repo: `~/alis.build/<organisation-id>/define`.
-- Commit and push, then run Define against an explicit, reviewed commit SHA (never `HEAD`).
+- Commit and push, then run Define against a specific, reviewed commit — the
+  contract pins to that exact commit, so it has to be deliberate (the tools enforce
+  how the commit is supplied).
 - Define pins the definition to that commit and generates consumable language packages
   (Go, JavaScript, Python, Dart, .NET, public ECMAScript when configured) and may sync platform
   artifacts such as Spanner protobundles or Pub/Sub topics.
@@ -26,8 +34,8 @@ Alis Build task, and walk the user through DBD rather than handing over a discon
 ## Deploy — provision and update the runtime
 
 - Review the neuron's Terraform under its `infra/` folder.
-- Deploy the successful build version to a real environment (e.g. DEV) — never invent an
-  environment id; get it from the product context.
+- Deploy the successful build version to a real environment (e.g. DEV). The
+  environment comes from the product context, not a guess (the tools resolve it).
 - Deploy makes the service reachable infrastructure (commonly Cloud Run plus supporting resources).
 - Validate end-to-end via the generated playground, usually `<neuron>/.playground/main_test.go`.
 
