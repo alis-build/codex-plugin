@@ -44,7 +44,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": ".*LoadSkill$",
+        "matcher": ".*(LoadSkill|SpecIt)$",
         "hooks": [
           {
             "type": "command",
