@@ -61,6 +61,12 @@ again:
   Define / Build / Deploy, or make commits before a skill is loaded. If no skill
   fits, say so and offer `RequestSkill`.
 
+- A capability question about buildable Alis Build work (e.g. "can you help with
+  tracing?", "are you able to add X?") rather than a concrete request → briefly
+  confirm this is Alis Build work, then ask the user to state the specific change
+  they want so you can route it through SearchSkills. Do NOT dive into the
+  codebase or give a generic how-to before they name the concrete change.
+
 - "spec it" / "spec it up", or a request to turn the current session into a build
   specification → call the `SpecIt` tool DIRECTLY. Do NOT route this through
   SearchSkills. It needs no arguments (session context is resolved server-side);
