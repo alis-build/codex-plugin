@@ -1,42 +1,11 @@
 {
   "hooks": {
-    "SessionStart": [
+    "UserPromptSubmit": [
       {
-        "matcher": "startup",
         "hooks": [
           {
             "type": "command",
-            "command": "${PLUGIN_ROOT}/hooks/dbd-primer.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "resume",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${PLUGIN_ROOT}/hooks/dbd-primer.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "clear",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${PLUGIN_ROOT}/hooks/dbd-primer.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${PLUGIN_ROOT}/hooks/dbd-primer.sh",
+            "command": "${PLUGIN_ROOT}/hooks/route-alis-triggers.sh",
             "timeout": 5
           }
         ]
