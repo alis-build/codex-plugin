@@ -47,6 +47,12 @@ lc="$(printf '%s' "$prompt" | tr '[:upper:]' '[:lower:]')"
 # platform mentions like "Use Alis Build to list landing zones".
 alis_vocative='(^|[^[:alnum:]])alis[[:space:]]*[,:]|(^|[^[:alnum:]])(hey|hi|ask)[[:space:]]+alis([^[:alnum:]]|$)|(^|[^[:alnum:]])alis[[:space:]]+(please|pls|could|can|would|will|help)([^[:alnum:]]|$)'
 
+# Pure acknowledgements / pleasantries. A follow-up whose WHOLE text is one of
+# these needs no routing context, so the sticky reminder is suppressed for it.
+# Anything more than a bare acknowledgement still gets the reminder, so real
+# (even obliquely phrased) requests are never missed.
+trivial_ack='^((thanks?|thank you|thanks a lot|thx|ty|tysm|ok|okay|k|kk|cool|nice|great|perfect|awesome|excellent|got it|gotcha|makes sense|sure|yep|yeah|yes|y|nope|no|n|sounds good|sg|will do|done|cheers|ta|np)[[:space:]!.,]*)+$'
+
 # Per-session marker so the routing contract stays sticky after the first "alis".
 session_id="$(printf '%s' "$payload" | jq -r '.session_id // empty' 2>/dev/null || true)"
 marker=""
@@ -101,7 +107,11 @@ in mind for this and the following turns:
 </alis-routing>
 EOF
 else
-  # Follow-up in an engaged session: terse reminder (full contract given earlier).
+  # Follow-up in an engaged session. Skip pure acknowledgements/pleasantries
+  # ("thanks", "ok", ...) — they need no routing context. Otherwise emit a terse
+  # reminder (the full contract was given on the engaging turn).
+  trimmed="$(printf '%s' "$lc" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')"
+  printf '%s' "$trimmed" | grep -Eq "$trivial_ack" && exit 0
   cat <<'EOF'
 <alis-routing>
 Alis Build router active (full contract was provided earlier this session). Any
