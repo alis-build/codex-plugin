@@ -1,6 +1,6 @@
 {
   "name": "tools",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Connect Codex to Alis Build through MCP tools and workspace context.",
   "author": {
     "name": "Alis Build"

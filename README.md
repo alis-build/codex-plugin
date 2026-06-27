@@ -97,6 +97,14 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   not just an Alis Build workspace.
 - **Session-aware skills.** When Codex loads an Alis Build skill, the plugin enriches the request with
   the active session so the server can return runtime context for your current workspace.
+- **`alis` CLI access.** A `SessionStart` hook ensures Codex can run the `alis` CLI without per-command
+  approval prompts. `alis` subcommands need network access and your local session, which Codex's
+  sandbox blocks; the only lever that runs a command unrestricted is an execpolicy allow rule, and a
+  plugin manifest cannot declare one. So the hook writes a dedicated
+  `~/.codex/rules/alis-build.rules` containing `prefix_rule(pattern=["alis"], decision="allow")` if no
+  rule already grants it. It takes effect from the next session if Codex loads rules before the hook
+  runs. To remove it, delete that file (and the `["alis"]` entry from `~/.codex/rules/default.rules` if
+  you also approved it interactively).
 
 Hooks are enabled by default in Codex. If you have disabled them globally, re-enable them by removing
 `[features].hooks = false` from `~/.codex/config.toml`.
