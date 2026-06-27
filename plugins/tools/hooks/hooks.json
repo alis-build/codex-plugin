@@ -21,6 +21,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "^exec_command$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PLUGIN_ROOT}/hooks/allow-alis-cli.sh",
+            "timeout": 5
+          }
+        ]
       }
     ]
   }
