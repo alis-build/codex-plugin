@@ -17,7 +17,6 @@ Use this plugin to let Codex inspect Alis Build landing zones, products, neurons
 - OAuth/OIDC sign-in through `https://identity.alisx.com`
 - Alis Build tools available inside Codex after sign-in
 - Alis Build tools available without per-call MCP approval prompts
-- The `alis` CLI auto-approved in Codex sessions, so command-line calls run without per-call prompts
 - Workspace-aware context injection through Codex hooks
 
 ## Before You Start
@@ -98,13 +97,6 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   not just an Alis Build workspace.
 - **Session-aware skills.** When Codex loads an Alis Build skill, the plugin enriches the request with
   the active session so the server can return runtime context for your current workspace.
-- **`alis` CLI auto-approval.** A `PreToolUse` hook approves single, simple `alis ...` shell commands so
-  Codex runs the CLI without an approval prompt each time. For safety it only approves a lone
-  invocation — anything that chains or redirects (`|`, `&&`, `||`, `;`, `&`, `>`, `<`, backticks,
-  `$(...)`) falls through to Codex's normal approval flow. To restrict which subcommands are
-  auto-approved, set `ALIS_ALLOWED_SUBCMDS` to a space-separated allowlist (e.g.
-  `ALIS_ALLOWED_SUBCMDS="define build deploy operations"`); unset means every `alis` subcommand is
-  approved.
 
 Hooks are enabled by default in Codex. If you have disabled them globally, re-enable them by removing
 `[features].hooks = false` from `~/.codex/config.toml`.
