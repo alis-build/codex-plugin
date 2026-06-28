@@ -5,18 +5,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${PLUGIN_ROOT}/hooks/ensure-alis-rule.sh",
+            "command": "${PLUGIN_ROOT}/hooks/load-primer.sh",
             "timeout": 5
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
+          },
           {
             "type": "command",
-            "command": "${PLUGIN_ROOT}/hooks/route-alis-triggers.sh",
+            "command": "${PLUGIN_ROOT}/hooks/ensure-alis-rule.sh",
             "timeout": 5
           }
         ]

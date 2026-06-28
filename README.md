@@ -89,12 +89,12 @@ Use the Alis Build - Getting Started skill to help me get started on Alis Build.
 
 This plugin ships Codex hooks that keep sessions grounded in the Alis Build workflow:
 
-- **Trigger routing + DBD primer.** When you address Alis (`alis, ...`), the plugin injects a short
-  Define → Build → Deploy primer (so Codex frames help around the platform lifecycle) together with
-  the router contract (build/fix → discover the right skill via `SearchSkills` first instead of
-  editing code directly; `spec it` → call `SpecIt` directly). Once injected, follow-up `build it` /
-  `fix it` / `spec it` are handled from that context — they don't re-inject. Works in any directory,
-  not just an Alis Build workspace.
+- **Standing DBD primer + routing.** A `SessionStart` hook loads the Define → Build → Deploy primer
+  into every session (so Codex frames help around the platform lifecycle), together with the routing
+  contract: build/fix → discover the right skill via `SearchSkills` first instead of editing code
+  directly; `define it` / `deploy it` → run the `alis` CLI; `spec it` → call `SpecIt` directly. It is
+  always present, so no trigger word is needed and follow-up requests stay grounded. Works in any
+  directory, not just an Alis Build workspace.
 - **Session-aware skills.** When Codex loads an Alis Build skill, the plugin enriches the request with
   the active session so the server can return runtime context for your current workspace.
 - **`alis` CLI access.** A `SessionStart` hook ensures Codex can run the `alis` CLI without per-command
