@@ -95,6 +95,9 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   directly; `define it` / `deploy it` → run the `alis` CLI; `spec it` → call `SpecIt` directly. It is
   always present, so no trigger word is needed and follow-up requests stay grounded. Works in any
   directory, not just an Alis Build workspace.
+- **Service context (workspace-aware).** A `SessionStart` hook detects when the session is opened
+  inside an Alis Build service folder (`~/alis.build/<org>/build|define/…`) and injects the package id
+  plus a pointer to the matching definitions ⇄ implementation counterpart. Silent outside a workspace.
 - **Session-aware skills.** When Codex loads an Alis Build skill, the plugin enriches the request with
   the active session so the server can return runtime context for your current workspace.
 - **`alis` CLI access.** A `SessionStart` hook ensures Codex can run the `alis` CLI without per-command

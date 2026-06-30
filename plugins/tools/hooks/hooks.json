@@ -12,6 +12,11 @@
             "type": "command",
             "command": "${PLUGIN_ROOT}/hooks/ensure-alis-rule.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "${PLUGIN_ROOT}/hooks/inject-service-context.sh",
+            "timeout": 5
           }
         ]
       }
