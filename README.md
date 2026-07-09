@@ -8,7 +8,7 @@
   <strong>Connect Codex to Alis Build.</strong>
 </p>
 
-Use this plugin to let Codex inspect Alis Build landing zones, products, neurons, builds, deploys, and related workspace context.
+Use this plugin to let Codex inspect Alis Build organisations, products, neurons, builds, deploys, and related workspace context.
 
 ## What You Get
 
@@ -24,7 +24,7 @@ Use this plugin to let Codex inspect Alis Build landing zones, products, neurons
 You need:
 
 - Codex CLI or the Codex IDE extension
-- An Alis Build account with access to the landing zones and products you want to use
+- An Alis Build account with access to the organisations and products you want to use
 - Network access to `https://mcp.alis.build` and `https://identity.alisx.com`
 
 ## Install
@@ -60,11 +60,11 @@ fix it
 ```
 
 ```text
-Use Alis Build to list the landing zones I can access.
+Use Alis Build to list the organisations I can access.
 ```
 
 ```text
-Show recent builds for product os in landing zone alis.
+Show recent builds for product os in organisation alis.
 ```
 
 ```text
@@ -107,7 +107,10 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   `~/.codex/rules/alis-build.rules` containing `prefix_rule(pattern=["alis"], decision="allow")` if no
   rule already grants it. It takes effect from the next session if Codex loads rules before the hook
   runs. To remove it, delete that file (and the `["alis"]` entry from `~/.codex/rules/default.rules` if
-  you also approved it interactively).
+  you also approved it interactively). Production deploys stay safe despite the broad allow: the CLI
+  itself refuses to deploy to a production environment (exit code 3) until re-run with
+  `--confirm-production`, which the agent is instructed to add only after your explicit approval
+  (`alis docs safety`).
 
 Hooks are enabled by default in Codex. If you have disabled them globally, re-enable them by removing
 `[features].hooks = false` from `~/.codex/config.toml`.
