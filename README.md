@@ -91,29 +91,47 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
 
 - **Standing DBD primer + routing.** A `SessionStart` hook loads the Define → Build → Deploy primer
   into every session (so Codex frames help around the platform lifecycle), together with the routing
-  contract: build/fix → discover the right skill via `SearchSkills` first instead of editing code
-  directly; `define it` / `deploy it` → run the `alis` CLI; `spec it` → call `SpecIt` directly. It is
-  always present, so no trigger word is needed and follow-up requests stay grounded. Works in any
-  directory, not just an Alis Build workspace.
+  contract: build/fix → discover the right skill via `alis skills search` first (MCP `SearchSkills`
+  only without a shell) instead of editing code directly; `define it` / `deploy it` → run the `alis`
+  CLI; `spec it` → call `SpecIt` directly. It is always present, so no trigger word is needed and
+  follow-up requests stay grounded. Works in any directory, not just an Alis Build workspace.
 - **Service context (workspace-aware).** A `SessionStart` hook detects when the session is opened
   inside an Alis Build service folder (`~/alis.build/<org>/build|define/…`) and injects the package id
   plus a pointer to the matching definitions ⇄ implementation counterpart. Silent outside a workspace.
-- **Session-aware skills.** When Codex loads an Alis Build skill, the plugin enriches the request with
-  the active session so the server can return runtime context for your current workspace.
+- **Session-aware skills.** When Codex calls the Alis Build `LoadSkill`, `SpecIt`, `RunDefine`,
+  `RunBuild`, or `RunDeploy` tools, the plugin enriches the request with the active session so the
+  server can resolve runtime context for your current workspace and link build activity.
 - **`alis` CLI access.** A `SessionStart` hook ensures Codex can run the `alis` CLI without per-command
   approval prompts. `alis` subcommands need network access and your local session, which Codex's
   sandbox blocks; the only lever that runs a command unrestricted is an execpolicy allow rule, and a
-  plugin manifest cannot declare one. So the hook writes a dedicated
-  `~/.codex/rules/alis-build.rules` containing `prefix_rule(pattern=["alis"], decision="allow")` if no
-  rule already grants it. It takes effect from the next session if Codex loads rules before the hook
-  runs. To remove it, delete that file (and the `["alis"]` entry from `~/.codex/rules/default.rules` if
-  you also approved it interactively). Production deploys stay safe despite the broad allow: the CLI
-  itself refuses to deploy to a production environment (exit code 3) until re-run with
-  `--confirm-production`, which the agent is instructed to add only after your explicit approval
-  (`alis docs safety`).
+  plugin manifest cannot declare one. So the hook writes a dedicated, version-stamped
+  `~/.codex/rules/alis-build.rules` (v2) containing a broad `prefix_rule(pattern=["alis"],
+  decision="allow")` (skipped if your own rules already grant it) plus a
+  `prefix_rule(pattern=["alis", ["blocks", "block"], "uninstall"], decision="prompt")` — execpolicy's
+  most-restrictive-wins keeps the destructive `blocks uninstall` on a human prompt (double-keying)
+  even though the broad allow matches. It takes effect from the next session if Codex loads rules
+  before the hook runs. To remove it, delete that file (and the `["alis"]` entry from
+  `~/.codex/rules/default.rules` if you also approved it interactively). Prefix rules cannot match
+  flags at arbitrary positions, so `--confirm-production` and `--approve` cannot be carved out here;
+  production stays safe regardless — the CLI itself refuses to deploy to a production environment
+  (exit code 3) until re-run with `--confirm-production`, which the agent is instructed to add only
+  after your explicit approval (`alis docs safety`). Codex also evaluates each segment of a chained
+  command separately, so `alis define && rm -rf /` cannot ride on the allow.
+- **Approval record for the alis CLI.** A `PreToolUse` hook on the shell tool records each clean,
+  single `alis …` invocation at `~/.alis/agent-approval.json` (harness `codex`, the session's
+  permission mode, the exact command). It is an observer only — execpolicy owns shell approval — and
+  lets the alis CLI treat a fresh record in an auto-accept mode as a standing grant for
+  non-production approvals. Production deploys always require `--confirm-production` from a human.
 
 Hooks are enabled by default in Codex. If you have disabled them globally, re-enable them by removing
 `[features].hooks = false` from `~/.codex/config.toml`.
+
+## Primer sync
+
+`plugins/tools/context/dbd-primer.md` is synced from the canonical primer in the Alis Build
+Claude Code plugin (`claude-plugin/plugins/alis-build/context/dbd-primer.md`). The only local
+difference is the closing sentence of the Google documentation section (Codex has no
+`/connect-google` command). Sync the body on each claude-plugin primer release.
 
 ## Troubleshooting
 
