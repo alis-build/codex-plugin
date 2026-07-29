@@ -8,48 +8,33 @@
   <strong>Connect Codex to Alis Build.</strong>
 </p>
 
-Use this plugin to let Codex inspect Alis Build organisations, products, neurons, builds, deploys, and related workspace context.
+Use this plugin to let Codex work with Alis Build organisations, products, neurons, builds, and deploys through the `alis` CLI, with workspace-aware context injected into every session.
 
 ## What You Get
 
-- A preconfigured Codex MCP server for `https://mcp.alis.build`
-- A preconfigured Alis Build OAuth client and scopes for MCP sign-in
-- OAuth/OIDC sign-in through `https://identity.alisx.com`
-- Alis Build tools available inside Codex after sign-in
-- Alis Build tools available without per-call MCP approval prompts
+- A standing Define → Build → Deploy primer loaded into every session, with CLI-first skill routing (`alis skills search|load`)
 - Workspace-aware context injection through Codex hooks
+- The `alis` CLI runnable without per-command approval prompts (with destructive commands double-keyed)
 
 ## Before You Start
 
 You need:
 
 - Codex CLI or the Codex IDE extension
+- The `alis` CLI installed, on your `PATH`, and signed in (`alis login`)
 - An Alis Build account with access to the organisations and products you want to use
-- Network access to `https://mcp.alis.build` and `https://identity.alisx.com`
 
 ## Install
 
-Install the Alis Build plugin and sign in:
+Install the Alis Build plugin:
 
 ```sh
-codex plugin marketplace add alis-build/codex-plugin && codex plugin add tools@alis-build && codex mcp login alis-build && codex
+codex plugin marketplace add https://github.com/alis-build/codex-plugin && codex plugin add tools@alis-build && codex
 ```
-
-The sign-in flow opens `https://identity.alisx.com` in your browser.
-
-## Sign In
-
-In Codex, run:
-
-```text
-/mcp
-```
-
-You should see `alis-build` listed as an MCP server.
 
 ## Use It
 
-After sign-in, ask Codex to use Alis Build:
+Ask Codex to use Alis Build:
 
 ```text
 build it
@@ -71,7 +56,7 @@ Show recent builds for product os in organisation alis.
 Review the latest deploy logs for this neuron and suggest the next action.
 ```
 
-Codex will use the Alis Build tools without asking for approval on every MCP call.
+Codex runs these through the `alis` CLI without asking for approval on every command.
 
 ## Workflow Skills
 
@@ -91,16 +76,13 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
 
 - **Standing DBD primer + routing.** A `SessionStart` hook loads the Define → Build → Deploy primer
   into every session (so Codex frames help around the platform lifecycle), together with the routing
-  contract: build/fix → discover the right skill via `alis skills search` first (MCP `SearchSkills`
-  only without a shell) instead of editing code directly; `define it` / `deploy it` → run the `alis`
-  CLI; `spec it` → call `SpecIt` directly. It is always present, so no trigger word is needed and
-  follow-up requests stay grounded. Works in any directory, not just an Alis Build workspace.
+  contract: build/fix → discover the right skill via `alis skills search` first instead of editing
+  code directly; `define it` / `deploy it` → run the `alis` CLI. It is always present, so no trigger
+  word is needed and follow-up requests stay grounded. Works in any directory, not just an Alis
+  Build workspace.
 - **Service context (workspace-aware).** A `SessionStart` hook detects when the session is opened
   inside an Alis Build service folder (`~/alis.build/<org>/build|define/…`) and injects the package id
   plus a pointer to the matching definitions ⇄ implementation counterpart. Silent outside a workspace.
-- **Session-aware skills.** When Codex calls the Alis Build `LoadSkill`, `SpecIt`, `RunDefine`,
-  `RunBuild`, or `RunDeploy` tools, the plugin enriches the request with the active session so the
-  server can resolve runtime context for your current workspace and link build activity.
 - **`alis` CLI access.** A `SessionStart` hook ensures Codex can run the `alis` CLI without per-command
   approval prompts. `alis` subcommands need network access and your local session, which Codex's
   sandbox blocks; the only lever that runs a command unrestricted is an execpolicy allow rule, and a
@@ -135,23 +117,10 @@ difference is the closing sentence of the Google documentation section (Codex ha
 
 ## Troubleshooting
 
-If `alis-build` does not appear in `/mcp`, confirm that the plugin install completed successfully:
+If the primer or hooks do not take effect, confirm that the plugin install completed successfully:
 
 ```sh
 codex plugin add tools@alis-build
 ```
 
-If sign-in fails, confirm that you can reach both `https://mcp.alis.build` and `https://identity.alisx.com`, then run the login command again:
-
-```sh
-codex mcp login alis-build
-```
-
-If you see `Dynamic client registration not supported`, remove any manually added MCP server with the same name and use the plugin-provided configuration:
-
-```sh
-codex mcp remove alis-build
-codex mcp login alis-build
-```
-
-That error usually means `alis-build` was previously added with `codex mcp add alis-build --url https://mcp.alis.build`, which does not include the Alis Build OAuth client ID.
+If `alis` commands fail with an auth error, run `alis login` (or `alis authorise <org>.<product>` for git/package credentials) and retry.

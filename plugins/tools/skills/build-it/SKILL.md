@@ -10,7 +10,7 @@ Use this skill when the user says `build it`, `fix it`, or asks to build or fix 
 
 1. Use the user's request, visible errors, repository context, and any available Alis Build context to determine what needs to be built or fixed.
 2. If the goal is still ambiguous, ask one concise question: "What exactly should Alis build?"
-3. Once the goal is clear, run `alis skills search "<clarified goal>" --json` (use the Alis Build MCP `SearchSkills` tool only if no shell is available). The search must be the first discovery step.
+3. Once the goal is clear, run `alis skills search "<clarified goal>" --json`. The search must be the first discovery step.
 4. Present the matching skills in a concise table with number, skill id, description, and when to choose it.
 5. Ask the user which skill to use before loading or executing any specialized workflow.
 6. Load the chosen skill with `alis skills load <id>` and follow its instructions — the loaded skill owns execution.

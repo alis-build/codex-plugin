@@ -23,16 +23,6 @@
     ],
     "PreToolUse": [
       {
-        "matcher": ".*(LoadSkill|SpecIt|RunDefine|RunBuild|RunDeploy)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${PLUGIN_ROOT}/hooks/inject-skill-session-id.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
         "matcher": "^(Bash|bash|shell|local_shell)$",
         "hooks": [
           {
