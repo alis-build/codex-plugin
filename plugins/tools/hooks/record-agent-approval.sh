@@ -11,10 +11,10 @@
 # (production deploys always require explicit human approval via
 # --confirm-production, regardless of harness).
 #
-# The permission mode is taken from the payload as-is (permission_mode when
-# present, else approval_policy); the CLI decides which values count as an
-# auto-accept mode per harness. Everything here is best-effort: any parse
-# failure or unexpected payload shape exits 0 with no output.
+# The permission mode and session id are taken from the hook payload as-is.
+# The CLI accepts only Codex auto modes and requires the recorded session id to
+# match CODEX_THREAD_ID in the command process. Everything here is best-effort:
+# any parse failure or unexpected payload shape exits 0 with no output.
 set -euo pipefail
 
 command -v jq >/dev/null 2>&1 || exit 0
@@ -39,7 +39,7 @@ $cmd
 EOF
 [ "$first" = "alis" ] || exit 0
 
-mode="$(printf '%s' "$payload" | jq -r '.permission_mode // .approval_policy // "default"' 2>/dev/null || echo default)"
+mode="$(printf '%s' "$payload" | jq -r '.permission_mode // "default"' 2>/dev/null || echo default)"
 sid="$(printf '%s' "$payload" | jq -r '.session_id // empty' 2>/dev/null || true)"
 if mkdir -p "$HOME/.alis" 2>/dev/null && tmp="$(mktemp "$HOME/.alis/.agent-approval.XXXXXX" 2>/dev/null)"; then
   if jq -nc --arg m "$mode" --arg s "$sid" --arg c "$cmd" \

@@ -101,9 +101,11 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   command separately, so `alis define && rm -rf /` cannot ride on the allow.
 - **Approval record for the alis CLI.** A `PreToolUse` hook on the shell tool records each clean,
   single `alis …` invocation at `~/.alis/agent-approval.json` (harness `codex`, the session's
-  permission mode, the exact command). It is an observer only — execpolicy owns shell approval — and
-  lets the alis CLI treat a fresh record in an auto-accept mode as a standing grant for
-  non-production approvals. Production deploys always require `--confirm-production` from a human.
+  permission mode, session id, and exact command). It is an observer only — execpolicy owns shell
+  approval — and lets the alis CLI treat a fresh record from the same `CODEX_THREAD_ID` in
+  `acceptEdits`, `dontAsk`, or `bypassPermissions` mode as a standing grant for non-production
+  approvals. `default` and `plan` do not grant approval. Production deploys always require
+  `--confirm-production` from a human.
 
 Hooks are enabled by default in Codex. If you have disabled them globally, re-enable them by removing
 `[features].hooks = false` from `~/.codex/config.toml`.

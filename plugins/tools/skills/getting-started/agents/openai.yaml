@@ -1,2 +1,3 @@
 interface:
   display_name: "Alis Build - Getting Started"
+  short_description: "Start a guided Alis Build setup and optional quickstart."

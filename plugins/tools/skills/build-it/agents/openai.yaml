@@ -1,2 +1,3 @@
 interface:
   display_name: "Alis Build - Build It"
+  short_description: "Route an Alis Build implementation or fix to the right skill."

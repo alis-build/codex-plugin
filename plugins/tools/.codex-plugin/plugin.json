@@ -1,6 +1,6 @@
 {
   "name": "tools",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Connect Codex to Alis Build through the alis CLI and workspace context.",
   "author": {
     "name": "Alis Build"
@@ -9,7 +9,6 @@
   "repository": "https://github.com/alis-build/codex-plugin",
   "license": "MIT",
   "keywords": ["alis-build", "cli", "builds", "deploys", "workspaces"],
-  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "Alis Build",
     "shortDescription": "Inspect Alis Build workspaces, builds, and deploys from Codex.",
