@@ -1,6 +1,6 @@
 {
   "name": "tools",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Connect Codex to Alis Build through the alis CLI and workspace context.",
   "author": {
     "name": "Alis Build"
@@ -21,8 +21,8 @@
     "screenshots": ["assets/connectivity.svg"],
     "capabilities": ["Read", "Write"],
     "defaultPrompt": [
-      "build it",
-      "fix it",
+      "find a skill for …",
+      "capture this as a skill",
       "Use Alis Build to list the landing zones I can access.",
       "Use the getting-started skill to help me get started building on the Alis Build platform.",
       "Use Alis Build to inspect the current workspace, product, active neurons, and recent build status.",

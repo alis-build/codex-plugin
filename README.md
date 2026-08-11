@@ -12,7 +12,9 @@ Use this plugin to let Codex work with Alis Build organisations, products, neuro
 
 ## What You Get
 
-- A standing Define → Build → Deploy primer loaded into every session, with CLI-first skill routing (`alis skills search|load`)
+- A standing Define → Build → Deploy primer loaded into every session
+- Native skill discovery: a `discover` skill that finds and loads the right Alis Build skill from the registry on your own words, and a `capture` skill that saves just-completed work as a reusable team skill
+- Ambient per-prompt skill suggestions inside Alis Build workspaces (a `UserPromptSubmit` hook backed by `alis skills suggest`)
 - Workspace-aware context injection through Codex hooks
 - The `alis` CLI runnable without per-command approval prompts (with destructive commands double-keyed)
 
@@ -37,11 +39,11 @@ codex plugin marketplace add https://github.com/alis-build/codex-plugin && codex
 Ask Codex to use Alis Build:
 
 ```text
-build it
+find a skill for adding tracing to my service
 ```
 
 ```text
-fix it
+capture this as a skill
 ```
 
 ```text
@@ -62,24 +64,30 @@ Codex runs these through the `alis` CLI without asking for approval on every com
 
 This plugin includes Alis Build workflow skills:
 
+- **`discover`** — finds and loads the right Alis Build skill for platform work. It fires on your own words (Codex routes on the skill's description) whenever the task touches the Alis platform — no wake word needed — then searches the registry (`alis skills search`), presents the top matches, and loads the one you choose, which owns execution from there.
+- **`capture`** — turns work just completed in the session into a reusable team skill ("capture this as a skill"): dedupe against the registry, register a draft with `alis skills capture`, distill generalized steps, and publish on your approval.
+- **`getting-started`** — a guided Alis Build setup and optional quickstart:
+
 ```text
-build it
-fix it
 Use the Alis Build - Getting Started skill to help me get started on Alis Build.
 ```
-
-`build it` discovers the right Alis Build skill for the thing you want to build. `fix it` is an alias for the same discovery flow when the goal is framed as a fix.
 
 ## Workspace Context
 
 This plugin ships Codex hooks that keep sessions grounded in the Alis Build workflow:
 
-- **Standing DBD primer + routing.** A `SessionStart` hook loads the Define → Build → Deploy primer
-  into every session (so Codex frames help around the platform lifecycle), together with the routing
-  contract: build/fix → discover the right skill via `alis skills search` first instead of editing
-  code directly; `define it` / `deploy it` → run the `alis` CLI. It is always present, so no trigger
-  word is needed and follow-up requests stay grounded. Works in any directory, not just an Alis
-  Build workspace.
+- **Standing DBD primer.** A `SessionStart` hook loads the Define → Build → Deploy primer
+  into every session (so Codex frames help around the platform lifecycle), together with the skills
+  contract: discovery is native — the `discover` skill fires on your own words when the task
+  touches the platform; direct DBD commands (`define it` / `build it` / `deploy it` on a known
+  target) run the `alis` CLI with no skill. It is always present, so follow-up requests stay
+  grounded. Works in any directory, not just an Alis Build workspace.
+- **Per-prompt skill suggestions.** A `UserPromptSubmit` hook pipes each prompt's payload to
+  `alis skills suggest --hook --harness codex`, a purely local ~40ms call that prints plain-text
+  context or nothing. Wake phrases ("alis, …", "capture this as a skill") yield deterministic
+  routing instructions; other prompts get hard-gated ambient one-liners at most. It only runs
+  inside an `alis.build` workspace (set `ALIS_SUGGEST_ALWAYS=1` to force it elsewhere) and is
+  silent on every failure path — a missing or failing `alis` CLI never breaks a prompt.
 - **Service context (workspace-aware).** A `SessionStart` hook detects when the session is opened
   inside an Alis Build service folder (`~/alis.build/<org>/build|define/…`) and injects the package id
   plus a pointer to the matching definitions ⇄ implementation counterpart. Silent outside a workspace.
@@ -113,9 +121,13 @@ Hooks are enabled by default in Codex. If you have disabled them globally, re-en
 ## Primer sync
 
 `plugins/tools/context/dbd-primer.md` is synced from the canonical primer in the Alis Build
-Claude Code plugin (`claude-plugin/plugins/alis-build/context/dbd-primer.md`). The only local
-difference is the closing sentence of the Google documentation section (Codex has no
-`/connect-google` command). Sync the body on each claude-plugin primer release.
+Claude Code plugin (`claude-plugin/plugins/alis-build/context/dbd-primer.md`) — currently the
+dieted v0.17.0 primer, whose "Skills — discovery is native" section replaced the old wake-word
+routing prose. The local differences are harness adaptations only: the skills contract
+(preamble item 2 and the Skills section) names this plugin's `discover` / `capture` skills and
+the per-prompt suggestion hook instead of Claude's `alis-build:*` skills, and the closing
+sentence of the Google documentation section omits `/connect-google` (Codex has no such
+command). Sync the body on each claude-plugin primer release.
 
 ## Troubleshooting
 
