@@ -15,6 +15,7 @@ Use this plugin to let Codex work with Alis Build organisations, products, neuro
 - A standing Define → Build → Deploy primer loaded into every session
 - Native skill discovery: a `discover` skill that finds and loads the right Alis Build skill from the registry on your own words, and a `capture` skill that saves just-completed work as a reusable team skill
 - Ambient per-prompt skill suggestions inside Alis Build workspaces (a `UserPromptSubmit` hook backed by `alis skills suggest`)
+- Catalog metadata refreshed quietly at session start; the plugin never installs or prunes native user skills
 - Workspace-aware context injection through Codex hooks
 - The `alis` CLI runnable without per-command approval prompts (with destructive commands double-keyed)
 
@@ -88,6 +89,9 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   routing instructions; other prompts get hard-gated ambient one-liners at most. It only runs
   inside an `alis.build` workspace (set `ALIS_SUGGEST_ALWAYS=1` to force it elsewhere) and is
   silent on every failure path — a missing or failing `alis` CLI never breaks a prompt.
+- **Skills catalog refresh.** A `SessionStart` hook runs `alis skills sync --cache-only` in
+  the background. The CLI uses its 24-hour cache, and this explicit compatibility flag ensures
+  older CLIs also refresh metadata only—native user skills are never installed or pruned.
 - **Service context (workspace-aware).** A `SessionStart` hook detects when the session is opened
   inside an Alis Build service folder (`~/alis.build/<org>/build|define/…`) and injects the package id
   plus a pointer to the matching definitions ⇄ implementation counterpart. Silent outside a workspace.
@@ -122,7 +126,7 @@ Hooks are enabled by default in Codex. If you have disabled them globally, re-en
 
 `plugins/tools/context/dbd-primer.md` is synced from the canonical primer in the Alis Build
 Claude Code plugin (`claude-plugin/plugins/alis-build/context/dbd-primer.md`) — currently the
-dieted v0.17.0 primer, whose "Skills — discovery is native" section replaced the old wake-word
+v0.17.2 primer, whose "Skills — discovery is native" section replaced the old wake-word
 routing prose. The local differences are harness adaptations only: the skills contract
 (preamble item 2 and the Skills section) names this plugin's `discover` / `capture` skills and
 the per-prompt suggestion hook instead of Claude's `alis-build:*` skills, and the closing
