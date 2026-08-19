@@ -1,61 +1,52 @@
 ---
 name: discover
 description: >-
-  Find and load the right Alis Build skill for platform work. Alis Build is the
-  Define-Build-Deploy (DBD) platform: protobuf contracts in the define repo, Go
-  services (neurons) in product build repos, deploys to Cloud Run via
-  Terraform. Use this skill FIRST — before writing code or running commands —
-  whenever the task touches the Alis platform: creating or changing a product,
-  neuron, block, or landing zone; editing .proto contracts and running Define;
-  building or deploying a service; Spanner schemas or protobundles; Pub/Sub
-  topics; Terraform under infra/; generated packages failing to resolve;
-  playground tests; migrating legacy proto imports. Trigger on "alis", "hey
-  alis", "ask alis to"; on "how do I ... on/in Alis" or any Alis Build platform
-  question; on deploy, release, ship, protobuf, proto, Define, neuron, product,
-  block, landing zone, Spanner, protobundle, Pub/Sub, Terraform, infra,
-  playground, packages, DBD; and on build/fix/add/create requests inside an
-  alis.build workspace when no Alis skill is loaded yet. Not for generic coding
-  unrelated to the platform, and not when a loaded Alis skill already covers
-  the task. It searches the Alis skills registry (thousands of curated skills),
-  presents the top matches, and loads the chosen one, which then owns
-  execution.
+  Find and load the right Alis Build skill from the registry. Use when the
+  task is platform-shaped: creating or changing a product, neuron, block, or
+  landing zone; editing .proto contracts or running Define; Spanner schemas or
+  protobundles; Pub/Sub event handlers; Terraform under a neuron's infra/;
+  generated packages failing to resolve; playground tests; migrating legacy
+  proto imports; ADK agents. Also on explicit asks: "find a skill for …",
+  "is there a skill for …", "alis, …", "hey alis". NOT a trigger: merely being
+  inside an alis.build workspace, Makefiles and local dev tooling, generic
+  Go/JS bugs or test authoring, git operations, reading logs, or when a loaded
+  Alis skill already covers the task. Probes the local catalog first
+  (instant), loads the chosen skill, which then owns execution.
 ---
 
 # Discover — find and load the right Alis Build skill
 
-You are routing, not executing. Find the best registry skill for the task, load it, and
-hand execution over to it.
+Route quietly: find the best skill, load it, hand over. No preamble about
+running discovery.
 
 ## Flow
 
-1. **Infer the intended outcome** from the current request and workspace context (current
-   directory, visible errors, recent conversation). Ask at most ONE concise clarifying
-   question, and only if the goal is genuinely ambiguous — otherwise proceed.
+1. **Infer the intended outcome** from the request and workspace context.
 
-2. **Search the registry**:
+2. **Probe locally** (~40ms, no network):
 
-   `alis skills search "<intended outcome>" --limit 8`
+   `alis skills suggest "<intended outcome>" --json`
 
-   Add `--json` when parsing the results programmatically. The search IS the discovery
-   mechanism — never list or page through the whole catalogue.
+   A candidate is real only when its `distinctive` score is ≥ 3 (on a CLI
+   that does not report `distinctive`, require `score` ≥ 5). Below that,
+   there is no skill — say nothing about discovery and do the work.
 
-3. **Present the matches**: for each, give the id, what it does, and when to choose it.
-   Recommend one and say why.
+3. **Unsure between candidates?** `alis skills preview <id>` is a cheap fit
+   check before committing to a load.
 
-4. **Load the chosen skill and follow it**:
+4. **Load and follow**: `alis skills load <id> --via dispatcher`. The loaded
+   skill owns execution — mention it in one clause, then follow its workflow.
 
-   `alis skills load <id>`
-
-   From this point the loaded skill owns execution — follow its workflow, not your own
-   plan.
+5. **Registry search is the exception, not the default**:
+   `alis skills search "<outcome>" --limit 3 --json` only when the user
+   explicitly asked to find a skill, or the local probe was genuinely
+   ambiguous. On any failure, fall back to the probe result and continue —
+   never block, never retry.
 
 ## Rules
 
-- For platform-shaped work: do not inspect or edit code, run Define / Build / Deploy, or
-  make commits before a skill is loaded. Route first.
-- If nothing fits, say so and offer to file it:
-  `alis skills request --name "..." --description "..."`. Then plant the capture seed in
-  one sentence: "If we end up solving this by hand in this session, say 'capture this as
-  a skill' afterwards and I'll save it for your team."
-- If `alis skills search` fails or the `alis` CLI is absent, say so plainly and continue
-  helping without a skill — never block on discovery.
+- Discovery runs at most once per task: after a miss, do not re-probe on
+  follow-up prompts about the same piece of work.
+- If the user asked for a skill and nothing fits, say so and offer to file
+  it: `alis skills request --name "…" --description "…"`.
+- If the `alis` CLI is absent, continue helping without a skill.

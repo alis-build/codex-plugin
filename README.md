@@ -13,8 +13,8 @@ Use this plugin to let Codex work with Alis Build organisations, products, neuro
 ## What You Get
 
 - A standing Define → Build → Deploy primer loaded into every session
-- Native skill discovery: a `discover` skill that finds and loads the right Alis Build skill from the registry on your own words, and a `capture` skill that saves just-completed work as a reusable team skill
-- Ambient per-prompt skill suggestions inside Alis Build workspaces (a `UserPromptSubmit` hook backed by `alis skills suggest`)
+- Quiet, local-first skill discovery: a `discover` skill that fires on platform-shaped work (never on generic coding just because you are inside a workspace), probes the local catalog in ~40ms, and loads the right registry skill; plus a `capture` skill that saves just-completed work as a reusable team skill
+- Confidence-gated per-prompt skill suggestions (a `UserPromptSubmit` hook backed by `alis skills suggest`) — a suggestion appears only when the match is distinctive; wake phrases (`alis, …`, `capture this as a skill`) route from any directory
 - Catalog metadata refreshed quietly at session start; the plugin never installs or prunes native user skills
 - Workspace-aware context injection through Codex hooks
 - The `alis` CLI runnable without per-command approval prompts (with destructive commands double-keyed)
@@ -65,7 +65,7 @@ Codex runs these through the `alis` CLI without asking for approval on every com
 
 This plugin includes Alis Build workflow skills:
 
-- **`discover`** — finds and loads the right Alis Build skill for platform work. It fires on your own words (Codex routes on the skill's description) whenever the task touches the Alis platform — no wake word needed — then searches the registry (`alis skills search`), presents the top matches, and loads the one you choose, which owns execution from there.
+- **`discover`** — finds and loads the right Alis Build skill for platform-shaped work. It fires on your own words (Codex routes on the skill's description) when the task touches the platform — proto contracts, neurons, Define/Build/Deploy, Spanner, Pub/Sub, ADK agents — but not on generic coding (Makefiles, ordinary bugs, tests, git) just because you are inside a workspace. It probes the local catalog first (`alis skills suggest --json`, ~40ms, no network), loads a skill only on a distinctive match, and hands execution to it; the registry search (`alis skills search`) is reserved for explicit "find me a skill" asks. No match means silence — it never narrates discovery that found nothing.
 - **`capture`** — turns work just completed in the session into a reusable team skill ("capture this as a skill"): dedupe against the registry, register a draft with `alis skills capture`, distill generalized steps, and publish on your approval.
 - **`getting-started`** — a guided Alis Build setup and optional quickstart:
 
@@ -86,9 +86,12 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
 - **Per-prompt skill suggestions.** A `UserPromptSubmit` hook pipes each prompt's payload to
   `alis skills suggest --hook --harness codex`, a purely local ~40ms call that prints plain-text
   context or nothing. Wake phrases ("alis, …", "capture this as a skill") yield deterministic
-  routing instructions; other prompts get hard-gated ambient one-liners at most. It only runs
-  inside an `alis.build` workspace (set `ALIS_SUGGEST_ALWAYS=1` to force it elsewhere) and is
-  silent on every failure path — a missing or failing `alis` CLI never breaks a prompt.
+  routing instructions and work from any directory; other prompts get at most one ambient
+  one-liner, and only when the match is distinctive (the CLI's confidence gate keys on id/name
+  token evidence, so generic Makefile/rename/debug prompts stay silent). Inside an `alis.build`
+  workspace the hook runs on every prompt; elsewhere a cheap prefilter skips prompts that
+  cannot contain a wake phrase (set `ALIS_SUGGEST_ALWAYS=1` to disable the prefilter). Silent
+  on every failure path — a missing or failing `alis` CLI never breaks a prompt.
 - **Skills catalog refresh.** A `SessionStart` hook runs `alis skills sync --cache-only` in
   the background. The CLI uses its 24-hour cache, and this explicit compatibility flag ensures
   older CLIs also refresh metadata only—native user skills are never installed or pruned.
@@ -126,12 +129,13 @@ Hooks are enabled by default in Codex. If you have disabled them globally, re-en
 
 `plugins/tools/context/dbd-primer.md` is synced from the canonical primer in the Alis Build
 Claude Code plugin (`claude-plugin/plugins/alis-build/context/dbd-primer.md`) — currently the
-v0.17.2 primer, whose "Skills — discovery is native" section replaced the old wake-word
-routing prose. The local differences are harness adaptations only: the skills contract
-(preamble item 2 and the Skills section) names this plugin's `discover` / `capture` skills and
-the per-prompt suggestion hook instead of Claude's `alis-build:*` skills, and the closing
-sentence of the Google documentation section omits `/connect-google` (Codex has no such
-command). Sync the body on each claude-plugin primer release.
+v0.19.0 primer, whose "Skills — discovery is native and quiet" section describes local-first,
+confidence-gated discovery and whose Executing DBD section carries the "Diagnose before
+re-running" block and the `.playground` hidden+gitignored gotcha. The local differences are
+harness adaptations only: the Skills section names this plugin's `discover` / `capture`
+skills instead of Claude's `alis-build:*` skills, and the Google documentation section omits
+`/connect-google` (Codex has no such command). Sync the body on each claude-plugin primer
+release.
 
 ## Troubleshooting
 
