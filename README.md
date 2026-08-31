@@ -12,7 +12,7 @@ Use this plugin to let Codex work with Alis Build organisations, products, neuro
 
 ## What You Get
 
-- A standing Define → Build → Deploy primer loaded into every session
+- A workspace-gated Define → Build → Deploy primer: the full primer inside an `alis.build` workspace, a compressed digest elsewhere when the `alis` CLI is installed, and zero tokens on unrelated projects
 - Quiet, local-first skill discovery: a `discover` skill that fires on platform-shaped work (never on generic coding just because you are inside a workspace), probes the local catalog in ~40ms, and loads the right registry skill; plus a `capture` skill that saves just-completed work as a reusable team skill
 - Confidence-gated per-prompt skill suggestions (a `UserPromptSubmit` hook backed by `alis skills suggest`) — a suggestion appears only when the match is distinctive; wake phrases (`alis, …`, `capture this as a skill`) route from any directory
 - Catalog metadata refreshed quietly at session start; the plugin never installs or prunes native user skills
@@ -77,12 +77,15 @@ Use the Alis Build - Getting Started skill to help me get started on Alis Build.
 
 This plugin ships Codex hooks that keep sessions grounded in the Alis Build workflow:
 
-- **Standing DBD primer.** A `SessionStart` hook loads the Define → Build → Deploy primer
-  into every session (so Codex frames help around the platform lifecycle), together with the skills
+- **DBD primer (workspace-gated).** A `SessionStart` hook loads the Define → Build → Deploy
+  primer (so Codex frames help around the platform lifecycle), together with the skills
   contract: discovery is native — the `discover` skill fires on your own words when the task
   touches the platform; direct DBD commands (`define it` / `build it` / `deploy it` on a known
-  target) run the `alis` CLI with no skill. It is always present, so follow-up requests stay
-  grounded. Works in any directory, not just an Alis Build workspace.
+  target) run the `alis` CLI with no skill. The full primer loads only when the session's
+  working directory is inside an `alis.build` workspace; outside a workspace, a machine with
+  the `alis` CLI on `PATH` gets a compressed digest instead, and a machine with neither gets
+  nothing — unrelated projects pay zero tokens. Set `ALIS_PRIMER=full|digest|off` to override
+  the gate.
 - **Per-prompt skill suggestions.** A `UserPromptSubmit` hook pipes each prompt's payload to
   `alis skills suggest --hook --harness codex`, a purely local ~40ms call that prints plain-text
   context or nothing. Wake phrases ("alis, …", "capture this as a skill") yield deterministic
@@ -127,15 +130,13 @@ Hooks are enabled by default in Codex. If you have disabled them globally, re-en
 
 ## Primer sync
 
-`plugins/tools/context/dbd-primer.md` is synced from the canonical primer in the Alis Build
-Claude Code plugin (`claude-plugin/plugins/alis-build/context/dbd-primer.md`) — currently the
-v0.19.0 primer, whose "Skills — discovery is native and quiet" section describes local-first,
-confidence-gated discovery and whose Executing DBD section carries the "Diagnose before
-re-running" block and the `.playground` hidden+gitignored gotcha. The local differences are
-harness adaptations only: the Skills section names this plugin's `discover` / `capture`
-skills instead of Claude's `alis-build:*` skills, and the Google documentation section omits
-`/connect-google` (Codex has no such command). Sync the body on each claude-plugin primer
-release.
+`plugins/tools/context/dbd-primer.md` and `plugins/tools/context/dbd-digest.md` are synced
+from the canonical primer and digest in the Alis Build Claude Code plugin
+(`claude-plugin/plugins/alis-build/context/`). The local differences are harness adaptations
+only: the Skills sections name this plugin's `discover` / `capture` skills instead of
+Claude's `alis-build:*` skills, and the primer gate reads Codex's hook environment
+(`PLUGIN_ROOT`, `CODEX_PROJECT_DIR`) with no resume/compact branch (Codex hooks carry no
+session-source payload). Sync the bodies on each claude-plugin primer release.
 
 ## Troubleshooting
 
