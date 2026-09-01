@@ -38,6 +38,16 @@ jq -e . "$repo/plugins/tools/hooks/hooks.json" >/dev/null || {
   fail=1
 }
 
+# 4. Every hook regression must pass. Syntax-only checks do not catch manifest
+#    scoping, lifecycle, approval, or fail-open behavior regressions.
+for f in "$repo"/plugins/tools/hooks/*.test.sh; do
+  [ -f "$f" ] || continue
+  if ! bash "$f"; then
+    echo "FAIL: hook regression failed: $f" >&2
+    fail=1
+  fi
+done
+
 if [ "$fail" -eq 0 ]; then
   echo "release guard: OK (version $pv)"
 fi

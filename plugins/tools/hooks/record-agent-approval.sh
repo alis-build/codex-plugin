@@ -7,9 +7,11 @@
 # cannot lift the sandbox, so there is nothing useful to decide here. What a
 # hook CAN do is run outside the sandbox and record the harness state the alis
 # CLI reads: a fresh record in an auto-accept permission mode, matching the
-# exact command, counts as a standing user grant for non-production approvals
-# (production deploys always require explicit human approval via
-# --confirm-production, regardless of harness).
+# exact command, counts as a standing user grant for non-production approvals.
+# Destructive `alis blocks|block uninstall` commands are deliberately excluded
+# from that grant, regardless of where global flags appear. Production deploys
+# always require explicit human approval via --confirm-production, regardless
+# of harness.
 #
 # The permission mode and session id are taken from the hook payload as-is.
 # The CLI accepts only Codex auto modes and requires the recorded session id to
@@ -38,6 +40,35 @@ read -r first _rest <<EOF
 $cmd
 EOF
 [ "$first" = "alis" ] || exit 0
+
+# Never manufacture a standing grant for block uninstall. Codex execpolicy can
+# match only exact argument prefixes, while Cobra accepts persistent flags in
+# several positions (`alis --json blocks uninstall`, for example). Inspect the
+# whole command so those valid flag permutations cannot bypass the CLI's human
+# approval gate. Removing shell quote/backslash syntax is intentionally
+# conservative: a false positive merely means the CLI asks for approval.
+#
+# Clear any existing record too. That invalidates a still-fresh uninstall grant
+# that an older plugin version may have written before this hook was upgraded.
+approval_words="${cmd//\\/}"
+approval_words="${approval_words//\"/}"
+approval_words="${approval_words//\'/}"
+approval_words="${approval_words//\$/}"
+read -r -a approval_argv <<<"$approval_words"
+saw_blocks=0
+for word in "${approval_argv[@]}"; do
+  case "$word" in
+    blocks | block)
+      saw_blocks=1
+      ;;
+    uninstall)
+      if [ "$saw_blocks" -eq 1 ]; then
+        rm -f "$HOME/.alis/agent-approval.json" 2>/dev/null || true
+        exit 0
+      fi
+      ;;
+  esac
+done
 
 mode="$(printf '%s' "$payload" | jq -r '.permission_mode // "default"' 2>/dev/null || echo default)"
 sid="$(printf '%s' "$payload" | jq -r '.session_id // empty' 2>/dev/null || true)"

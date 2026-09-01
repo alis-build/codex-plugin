@@ -73,7 +73,9 @@ if [ "$side" = "build" ]; then
 else  # define side
   printf 'This Codex session is inside an Alis Build definitions (define) directory — the protobuf API contract.\n'
   [ -n "$pkg" ] && printf '  Package id:  %s\n' "$pkg"
-  emit_protos "$dir"
+  # The session may have started below the version root (for example in a
+  # docs/ or generated/ child). Always enumerate the service's contract root.
+  emit_protos "$definedir"
   if [ -d "$builddir" ]; then
     printf '  The implementation (the DBD "Build" step) is available here:\n    %s\n' "$builddir"
   else

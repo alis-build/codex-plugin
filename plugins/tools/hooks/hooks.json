@@ -2,6 +2,7 @@
   "hooks": {
     "SessionStart": [
       {
+        "matcher": "^(startup|resume|clear|compact)$",
         "hooks": [
           {
             "type": "command",
@@ -10,18 +11,24 @@
           },
           {
             "type": "command",
+            "command": "${PLUGIN_ROOT}/hooks/inject-service-context.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "^startup$",
+        "hooks": [
+          {
+            "type": "command",
             "command": "${PLUGIN_ROOT}/hooks/ensure-alis-rule.sh",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "${PLUGIN_ROOT}/hooks/inject-service-context.sh",
-            "timeout": 5
-          },
-          {
-            "type": "command",
             "command": "${PLUGIN_ROOT}/hooks/sync-skills.sh",
-            "timeout": 5
+            "timeout": 30,
+            "async": true
           }
         ]
       }
@@ -39,7 +46,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "^(Bash|bash|shell|local_shell)$",
+        "matcher": "^Bash$",
         "hooks": [
           {
             "type": "command",

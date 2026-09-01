@@ -11,12 +11,14 @@
 # that directory, so we use a dedicated file rather than touching Codex's own
 # auto-managed default.rules.
 #
-# v2 rules: alongside the broad allow, a prompt rule for
-# `alis blocks|block uninstall …` — execpolicy's most-restrictive-wins keeps the
-# destructive uninstall on a human prompt (double-keying) even though the broad
-# allow matches too. Prefix rules cannot match flags at arbitrary positions, so
-# `--confirm-production` / `--approve` cannot be carved out here; the CLI's own
-# gates cover production (exit 3 until --confirm-production, always human).
+# v4 rules: alongside the broad allow, defense-in-depth prompt rules cover the
+# whole `alis blocks|block …` namespace and every invocation whose first
+# argument is a root persistent flag. Together they prevent flag ordering or an
+# explicit CLI approval flag from carrying a destructive uninstall through the
+# broad allow. The approval-record hook independently excludes every destructive
+# uninstall flag permutation from automatic standing grants.
+# Production remains separately gated (exit 3 until --confirm-production,
+# always human).
 #
 # Idempotent via the version stamp: our file is regenerated whenever the stamp
 # is missing or stale, and never touches any other rules file. The broad allow
@@ -25,7 +27,7 @@
 # session; the first session may prompt once (which Codex then remembers anyway).
 set -euo pipefail
 
-stamp='# alis-build.rules v2'
+stamp='# alis-build.rules v4'
 
 home="${CODEX_HOME:-$HOME/.codex}"
 dir="$home/rules"
@@ -52,7 +54,8 @@ tmp="$(mktemp "$dir/.alis-build.rules.XXXXXX")"
   if [ "$other_has_allow" -eq 0 ]; then
     printf '%s\n' 'prefix_rule(pattern=["alis"], decision="allow", justification="Alis Build CLI — safety gates enforced by the CLI itself (alis docs safety)")'
   fi
-  printf '%s\n' 'prefix_rule(pattern=["alis", ["blocks", "block"], "uninstall"], decision="prompt", justification="Destructive uninstall — double-key confirmation")'
+  printf '%s\n' 'prefix_rule(pattern=["alis", ["blocks", "block"]], decision="prompt", justification="Block management may be destructive — human confirmation required", match=["alis blocks list", "alis block uninstall block-id", "alis blocks --json uninstall block-id --yes"], not_match=["alis build package --json", "alis --json blocks uninstall block-id --yes"])'
+  printf '%s\n' 'prefix_rule(pattern=["alis", ["--approve", "--json", "--help", "-h", "--version", "-v"]], decision="prompt", justification="Flag-leading Alis invocation may reorder or pre-approve a destructive command — human confirmation required", match=["alis --json blocks uninstall block-id --yes", "alis --approve build package", "alis -h"], not_match=["alis build package --json", "alis blocks list"])'
 } >"$tmp"
 mv -f "$tmp" "$file"
 exit 0
