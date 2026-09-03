@@ -109,12 +109,17 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   without per-command approval prompts. `alis` subcommands need network access and your local session, which Codex's
   sandbox blocks; the only lever that runs a command unrestricted is an execpolicy allow rule, and a
   plugin manifest cannot declare one. So the hook writes a dedicated, version-stamped
-  `~/.codex/rules/alis-build.rules` (v4) containing a broad `prefix_rule(pattern=["alis"],
-  decision="allow")` (skipped if your own rules already grant it), plus prompt rules for the whole
-  `alis blocks|block …` namespace and for invocations whose first argument is `--approve`, `--json`,
-  `--help`, `-h`, `--version`, or `-v`. Execpolicy's most-restrictive-wins therefore prompts both
-  blocks-first and root-flag-first spellings, including explicit `--yes`/`--approve` uninstall
-  attempts. Canonical non-block commands such as `alis build … --json` retain the broad allow.
+  `~/.codex/rules/alis-build.rules` (v5) containing a broad `prefix_rule(pattern=["alis"],
+  decision="allow")` (skipped if your own rules already grant it), plus prompt rules for
+  `alis blocks|block uninstall`, for a flag placed ahead of the block verb (`alis blocks --json
+  uninstall …`), and for invocations whose first argument is a root persistent flag (`--approve`,
+  `--json`, `--verbose`, `--help`, `-h`, `--version`, `-v`). Execpolicy's most-restrictive-wins
+  therefore prompts every uninstall spelling, including explicit `--yes`/`--approve` attempts, while
+  `alis blocks install|list|versions|upgrade|merge` and canonical commands such as
+  `alis build … --json` retain the broad allow. That narrowness matters: under Codex's on-request
+  approval a prompt rule does not prompt by itself — a command the agent has not flagged for
+  escalation runs silently inside the sandbox, where every platform call fails on DNS. v4 covered
+  the whole `blocks` namespace and so turned a plain `alis blocks install` into a network error.
   The rules take effect from the next session if Codex loads them
   before the hook runs. To remove it, delete that file (and the `["alis"]` entry from
   `~/.codex/rules/default.rules` if you also approved it interactively). The approval-record hook
@@ -160,3 +165,14 @@ versioned plugin paths they originally loaded, while reinstalling may prune that
 continuing an old thread can therefore leave its hooks or skills pointing at missing files.
 
 If `alis` commands fail with an auth error, run `alis login` (or `alis authorise <org>.<product>` for git/package credentials) and retry.
+
+If an `alis` command fails with `can't reach alis.build … name resolver error: produced zero
+addresses`, it ran inside Codex's sandbox without network — usually because a prompt rule (yours, or
+a pre-v5 `alis-build.rules`) outranked the plugin's allow for that command. Ask the agent to rerun it
+with escalated permissions; the plugin's `alis` rule approves it without a prompt. Start a new
+thread after upgrading so the v5 rules are written.
+
+If `alis define|build|deploy` rejects `--json` with `unknown flag`, or prints an interactive
+`You are not logged in.  Log in now? (y|n)` prompt, an older `alis` binary is answering — the current
+CLI never prompts, it exits 4. `alis login` and escalation will not help; run `which -a alis` and
+`type alis` in that directory and remove or unshadow the old install.

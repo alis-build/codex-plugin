@@ -20,6 +20,10 @@ hand-roll package-manager environments — `alis packages` handles the private r
 and credentials for you. The working directory is the context — after `alis service new`,
 cd into the `buildFolder` its result reports before continuing. When a conversation
 references an Ideate project (`ideas/<id>`), run `alis ideate context <id>` first.
+`can't reach alis.build` means the command ran inside the sandbox without network: rerun
+it with escalated permissions, don't debug DNS. `unknown flag: --json` on a DBD command or
+a `Log in now? (y|n)` prompt means an older `alis` binary answered: `which -a alis`, report,
+stop.
 
 ## Skills are native
 

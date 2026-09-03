@@ -11,14 +11,22 @@
 # that directory, so we use a dedicated file rather than touching Codex's own
 # auto-managed default.rules.
 #
-# v4 rules: alongside the broad allow, defense-in-depth prompt rules cover the
-# whole `alis blocks|block …` namespace and every invocation whose first
-# argument is a root persistent flag. Together they prevent flag ordering or an
-# explicit CLI approval flag from carrying a destructive uninstall through the
-# broad allow. The approval-record hook independently excludes every destructive
-# uninstall flag permutation from automatic standing grants.
-# Production remains separately gated (exit 3 until --confirm-production,
-# always human).
+# v5 rules: alongside the broad allow, defense-in-depth prompt rules cover
+# `alis blocks|block uninstall`, a flag ahead of the block verb
+# (`alis blocks --json uninstall …`) and every invocation whose first argument
+# is a root persistent flag. Together they prevent flag ordering or an explicit
+# CLI approval flag from carrying a destructive uninstall through the broad
+# allow. The approval-record hook independently excludes every destructive
+# uninstall flag permutation from automatic standing grants. Production remains
+# separately gated (exit 3 until --confirm-production, always human).
+#
+# Why the prompt rules are this narrow (v4 covered the whole blocks namespace):
+# under Codex's on-request approval a prompt rule does not prompt by itself. A
+# command the model has not flagged for escalation runs silently inside the
+# sandbox, where every platform call fails on DNS — so v4 turned a plain
+# `alis blocks install` into a network error until the model retried with
+# escalation. Non-destructive block commands (list, versions, install, upgrade,
+# merge) must therefore keep the broad allow.
 #
 # Idempotent via the version stamp: our file is regenerated whenever the stamp
 # is missing or stale, and never touches any other rules file. The broad allow
@@ -27,7 +35,7 @@
 # session; the first session may prompt once (which Codex then remembers anyway).
 set -euo pipefail
 
-stamp='# alis-build.rules v4'
+stamp='# alis-build.rules v5'
 
 home="${CODEX_HOME:-$HOME/.codex}"
 dir="$home/rules"
@@ -54,8 +62,13 @@ tmp="$(mktemp "$dir/.alis-build.rules.XXXXXX")"
   if [ "$other_has_allow" -eq 0 ]; then
     printf '%s\n' 'prefix_rule(pattern=["alis"], decision="allow", justification="Alis Build CLI — safety gates enforced by the CLI itself (alis docs safety)")'
   fi
-  printf '%s\n' 'prefix_rule(pattern=["alis", ["blocks", "block"]], decision="prompt", justification="Block management may be destructive — human confirmation required", match=["alis blocks list", "alis block uninstall block-id", "alis blocks --json uninstall block-id --yes"], not_match=["alis build package --json", "alis --json blocks uninstall block-id --yes"])'
-  printf '%s\n' 'prefix_rule(pattern=["alis", ["--approve", "--json", "--help", "-h", "--version", "-v"]], decision="prompt", justification="Flag-leading Alis invocation may reorder or pre-approve a destructive command — human confirmation required", match=["alis --json blocks uninstall block-id --yes", "alis --approve build package", "alis -h"], not_match=["alis build package --json", "alis blocks list"])'
+  # Block uninstall only: every other block verb is non-destructive and must
+  # keep the allow, or Codex runs it sandboxed (see header).
+  printf '%s\n' 'prefix_rule(pattern=["alis", ["blocks", "block"], "uninstall"], decision="prompt", justification="Block uninstall is destructive — human confirmation required", match=["alis blocks uninstall block-id", "alis block uninstall block-id --json --yes"], not_match=["alis blocks install block-id --json", "alis blocks list", "alis build package --json"])'
+  # A flag ahead of the verb (root persistent flags and every uninstall flag)
+  # could reorder `uninstall` past the rule above.
+  printf '%s\n' 'prefix_rule(pattern=["alis", ["blocks", "block"], ["--approve", "--json", "--yes", "--verbose", "--quiet", "--instance", "--timeout", "--poll-interval", "--help", "-h"]], decision="prompt", justification="Flag-leading block invocation may reorder a destructive uninstall — human confirmation required", match=["alis blocks --json uninstall block-id --yes", "alis block --approve uninstall block-id"], not_match=["alis blocks install block-id --json", "alis blocks uninstall block-id"])'
+  printf '%s\n' 'prefix_rule(pattern=["alis", ["--approve", "--json", "--verbose", "--help", "-h", "--version", "-v"]], decision="prompt", justification="Flag-leading Alis invocation may reorder or pre-approve a destructive command — human confirmation required", match=["alis --json blocks uninstall block-id --yes", "alis --verbose blocks uninstall block-id", "alis --approve build package", "alis -h"], not_match=["alis build package --json", "alis blocks list"])'
 } >"$tmp"
 mv -f "$tmp" "$file"
 exit 0

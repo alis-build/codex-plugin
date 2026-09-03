@@ -50,4 +50,13 @@ expect "PWD fallback in workspace" full \
   "$(cd "$workspace" && env -i HOME="$test_dir" PATH="$test_dir/emptybin:/usr/bin:/bin" \
       PLUGIN_ROOT="$plugin_root" bash "$hook_dir/load-primer.sh" <<<'{"source":"startup"}')"
 
+# The sandbox-recovery bullet must reach both the full primer and the digest:
+# without it the agent debugs the network instead of asking for escalation
+# when a platform call fails inside the sandbox (ticket 4fd5150f).
+sandbox_marker="can't reach alis.build"
+echo "$(run_hook "$workspace" "$test_dir/emptybin")" | grep -qF "$sandbox_marker" \
+  || { echo "FAIL full primer: missing sandbox recovery bullet" >&2; exit 1; }
+echo "$(run_hook "$plain" "$test_dir/bin")" | grep -qF "$sandbox_marker" \
+  || { echo "FAIL digest: missing sandbox recovery bullet" >&2; exit 1; }
+
 echo "load-primer hook: gating matrix verified"

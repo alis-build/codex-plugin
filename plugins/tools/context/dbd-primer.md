@@ -85,6 +85,18 @@ directory.
   platform-side failure (e.g. a platform-injected credential error like `invalid_grant`) is
   not fixable in the repo — report it and offer `alis support send-message`/`send-session`
   instead of retrying.
+- **Sandbox recovery.** `can't reach alis.build` / `name resolver error: produced zero
+  addresses` means the command ran inside Codex's sandbox without network — the platform
+  is not down. Rerun it with escalated permissions (`sandbox_permissions:
+  "require_escalated"`; the plugin's `alis` rule approves it) instead of debugging DNS.
+  The `workspace-write` sandbox writes only under the directory Codex started in (plus
+  tmp): when that is the build repo, proto edits under `~/alis.build/<org>/define` need
+  approval, or the user adds the define repo to `sandbox_workspace_write.writable_roots`
+  in `~/.codex/config.toml`.
+- **Two `alis` binaries.** `unknown flag: --json` on define/build/deploy, or an interactive
+  `You are not logged in. Log in now? (y|n)` prompt, means an older `alis` answered — the
+  current CLI never prompts, it exits 4. Neither escalation nor `alis login` fixes it: run
+  `which -a alis` / `type alis`, report the shadowing binary and stop.
 - **Ideate context by reference.** When a conversation references an Alis Ideate project
   (`ideas/<id>`), run `alis ideate context <id>` first — one markdown document with
   everything the project holds; dig with `alis ideate specs|spec|stream|find`
