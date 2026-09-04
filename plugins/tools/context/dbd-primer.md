@@ -50,6 +50,9 @@ carry the contract. Generic coding (Makefiles, ordinary bugs, tests, git operati
 reading) needs no discovery even inside a workspace, and direct DBD commands on a known
 target run the CLI directly — no skill. After solving something new by hand, the user can
 say "capture this as a skill" and the plugin's `capture` skill saves it for their team.
+Skills learn from feedback: `alis skills feedback <id>` reaches the skill's owner, who runs
+`alis skills improve <id> --ticket <t>` to revise it from the conversation and the shared
+session (`alis docs skills`).
 
 ## Executing DBD — the `alis` CLI
 

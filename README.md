@@ -137,6 +137,16 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   approvals. Destructive block uninstalls never receive that automatic grant, regardless of flag
   order. `default` and `plan` do not grant approval. Production deploys always require
   `--confirm-production` from a human.
+- **Production guard.** A second `PreToolUse` hook on the shell tool denies any `alis …`
+  command that carries `--confirm-production`, wherever the flag sits, and returns a reason that
+  hands the exact command to you to run in your own terminal. The DBD primer already tells the
+  agent never to add that flag itself, but the primer arrives through a hook that can silently
+  fail (see Troubleshooting), execpolicy prefix rules cannot see a flag that follows a variable
+  package id, and with `approvals_reviewer = "auto_review"` an escalation is judged by a model,
+  not by you. Codex hooks honour only `allow` and `deny` today (`ask` is parsed but not
+  supported), so the guard is a deny: the agent cannot confirm a production rollout on your
+  behalf, and the CLI's exit-code-3 gate stays exactly where it was. Ordinary commands pay
+  nothing — the hook exits silently unless both `alis` and the flag are present.
 
 Hooks are enabled by default in Codex. If you have disabled them globally, re-enable them by removing
 `[features].hooks = false` from `~/.codex/config.toml`.
@@ -163,6 +173,18 @@ codex plugin add tools@alis-build
 After updating or reinstalling the plugin, start a new Codex thread. Active threads retain the
 versioned plugin paths they originally loaded, while reinstalling may prune that cached version;
 continuing an old thread can therefore leave its hooks or skills pointing at missing files.
+
+**Restart the Codex desktop app (and any long-running `codex app-server`) after an upgrade too.**
+The app-server resolves plugin paths once, at launch, and new threads inherit them. If the
+plugin cache is upgraded while the app is running (for example by a `codex` CLI session that
+refreshes the marketplace), the old version directory is pruned and every hook of the running
+app — primer, service context, skill suggestions, approval record, production guard — silently
+stops working for each new thread, while the skill list still advertises the old paths. The
+symptom is a session that starts with no "Alis Build — Define, Build, Deploy" primer block and a
+`No such file or directory` error when the agent opens a `discover`/`capture` skill. Hooks exit 0
+on every failure by design, so nothing else warns you. Until the app is restarted, treat such a
+session as having no Alis Build context at all, and in particular do not rely on it to respect
+the production gate.
 
 If `alis` commands fail with an auth error, run `alis login` (or `alis authorise <org>.<product>` for git/package credentials) and retry.
 

@@ -87,16 +87,22 @@ if [[ "$before" != "$after" ]]; then
   exit 1
 fi
 
+# The production guard runs first so its deny is decided before the observer
+# records anything; both match Codex's canonical Bash hook tool name.
 jq -e '
   .hooks.PreToolUse == [{
     matcher: "^Bash$",
     hooks: [{
+      type: "command",
+      command: "${PLUGIN_ROOT}/hooks/guard-production.sh",
+      timeout: 5
+    }, {
       type: "command",
       command: "${PLUGIN_ROOT}/hooks/record-agent-approval.sh",
       timeout: 5
     }]
   }]
 ' "$hook_dir/hooks.json" >/dev/null || {
-  echo "approval observer must match Codex's canonical Bash hook tool name" >&2
+  echo "PreToolUse must run the production guard then the approval observer on Codex's canonical Bash hook tool name" >&2
   exit 1
 }
