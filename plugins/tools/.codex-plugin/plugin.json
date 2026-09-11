@@ -1,6 +1,6 @@
 {
   "name": "tools",
-  "version": "0.21.5",
+  "version": "0.22.0",
   "description": "Connect Codex to Alis Build through the alis CLI and workspace context.",
   "author": {
     "name": "Alis Build"
@@ -8,7 +8,13 @@
   "homepage": "https://github.com/alis-build/codex-plugin",
   "repository": "https://github.com/alis-build/codex-plugin",
   "license": "MIT",
-  "keywords": ["alis-build", "cli", "builds", "deploys", "workspaces"],
+  "keywords": [
+    "alis-build",
+    "cli",
+    "builds",
+    "deploys",
+    "workspaces"
+  ],
   "interface": {
     "displayName": "Alis Build",
     "shortDescription": "Inspect Alis Build workspaces, builds, and deploys from Codex.",
@@ -18,14 +24,16 @@
     "brandColor": "#F02222",
     "composerIcon": "assets/alis.svg",
     "logo": "assets/alis.svg",
-    "screenshots": ["assets/connectivity.svg"],
-    "capabilities": ["Read", "Write"],
+    "screenshots": [
+      "assets/connectivity.svg"
+    ],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "defaultPrompt": [
       "find a skill for …",
       "capture this as a skill",
-      "Use Alis Build to list the landing zones I can access.",
-      "Use the getting-started skill to help me get started building on the Alis Build platform.",
-      "Use Alis Build to inspect the current workspace, product, active neurons, and recent build status.",
       "Use Alis Build to review the latest failed build or deploy logs and suggest the next action."
     ]
   }

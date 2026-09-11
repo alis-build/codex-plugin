@@ -29,6 +29,12 @@ if [ "$pv" != "$mv_" ]; then
   fail=1
 fi
 
+# Codex discards starter prompts when more than three are supplied.
+if ! jq -e '.interface.defaultPrompt | type == "array" and length <= 3 and all(.[]; type == "string" and length > 0)' "$repo/plugins/tools/.codex-plugin/plugin.json" >/dev/null; then
+  echo "FAIL: interface.defaultPrompt must contain at most three non-empty strings" >&2
+  fail=1
+fi
+
 # 3. Hook scripts must parse and hooks.json must be valid JSON.
 for f in "$repo"/plugins/tools/hooks/*.sh; do
   bash -n "$f" || { echo "FAIL: $f does not parse" >&2; fail=1; }
@@ -37,6 +43,15 @@ jq -e . "$repo/plugins/tools/hooks/hooks.json" >/dev/null || {
   echo "FAIL: hooks.json is not valid JSON" >&2
   fail=1
 }
+
+# Every registered hook must exist in the shipped plugin.
+while IFS= read -r command; do
+  case "$command" in
+    '${PLUGIN_ROOT}/'*) relative="${command#'${PLUGIN_ROOT}/'}"
+      [ -x "$repo/plugins/tools/$relative" ] || { echo "FAIL: missing or non-executable hook: $relative" >&2; fail=1; } ;;
+    *) echo "FAIL: hook must resolve from PLUGIN_ROOT: $command" >&2; fail=1 ;;
+  esac
+done < <(jq -r '.hooks[][] | .hooks[].command' "$repo/plugins/tools/hooks/hooks.json")
 
 # 4. Every hook regression must pass. Syntax-only checks do not catch manifest
 #    scoping, lifecycle, approval, or fail-open behavior regressions.

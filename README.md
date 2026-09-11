@@ -127,8 +127,9 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   grants. Production stays safe
   regardless — the CLI itself refuses to deploy to a production environment
   (exit code 3) until re-run with `--confirm-production`, which the agent is instructed to add only
-  after your explicit approval (`alis docs safety`). Codex also evaluates each segment of a chained
-  command separately, so `alis define && rm -rf /` cannot ride on the allow.
+  after your explicit approval (`alis docs safety`). Use one standalone `alis <command> … --json` invocation per tool call, with the
+  working directory passed separately. Complex shell wrappers may be reviewed as a whole
+  and will not reliably match the `alis` prefix rule.
 - **Approval record for the alis CLI.** A `PreToolUse` hook on the shell tool records each clean,
   single `alis …` invocation at `~/.alis/agent-approval.json` (harness `codex`, the session's
   permission mode, session id, and exact command). It is an observer only — execpolicy owns shell
@@ -136,17 +137,14 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   `acceptEdits`, `dontAsk`, or `bypassPermissions` mode as a standing grant for non-production
   approvals. Destructive block uninstalls never receive that automatic grant, regardless of flag
   order. `default` and `plan` do not grant approval. Production deploys always require
-  `--confirm-production` from a human.
-- **Production guard.** A second `PreToolUse` hook on the shell tool denies any `alis …`
-  command that carries `--confirm-production`, wherever the flag sits, and returns a reason that
-  hands the exact command to you to run in your own terminal. The DBD primer already tells the
-  agent never to add that flag itself, but the primer arrives through a hook that can silently
-  fail (see Troubleshooting), execpolicy prefix rules cannot see a flag that follows a variable
-  package id, and with `approvals_reviewer = "auto_review"` an escalation is judged by a model,
-  not by you. Codex hooks honour only `allow` and `deny` today (`ask` is parsed but not
-  supported), so the guard is a deny: the agent cannot confirm a production rollout on your
-  behalf, and the CLI's exit-code-3 gate stays exactly where it was. Ordinary commands pay
-  nothing — the hook exits silently unless both `alis` and the flag are present.
+  explicit user approval before the agent supplies `--confirm-production`.
+- **Production approval in Codex.** The `guard-production.sh` hook reminds the agent
+  to obtain explicit approval for the prepared, pinned deployment. After you approve that
+  deployment in Codex, the agent executes it and verifies its operation. The hook cannot
+  inspect conversational consent and emits neither `allow` nor `deny`; it is a reminder,
+  not a technical attestation of approval. The CLI still exits 3 without
+  `--confirm-production`. Auto mode, `--approve`, and general implementation instructions
+  do not grant production consent.
 
 Hooks are enabled by default in Codex. If you have disabled them globally, re-enable them by removing
 `[features].hooks = false` from `~/.codex/config.toml`.
@@ -188,11 +186,16 @@ the production gate.
 
 If `alis` commands fail with an auth error, run `alis login` (or `alis authorise <org>.<product>` for git/package credentials) and retry.
 
-If an `alis` command fails with `can't reach alis.build … name resolver error: produced zero
-addresses`, it ran inside Codex's sandbox without network — usually because a prompt rule (yours, or
-a pre-v5 `alis-build.rules`) outranked the plugin's allow for that command. Ask the agent to rerun it
-with escalated permissions; the plugin's `alis` rule approves it without a prompt. Start a new
-thread after upgrading so the v5 rules are written.
+If an `alis` command fails with `can't reach alis.build` or a DNS resolver error in a
+restricted sandbox, retry the same standalone command with network permission once.
+Set the tool's working directory separately; chained commands and shell wrappers may
+not match the prefix rule. If the retry fails, inspect connectivity and the response.
+A resolver error alone establishes neither a platform outage nor expired authentication.
+
+`alis doctor --json` reports cached Alis plugin versions, missing hook files, the rule
+stamp, and the last successful plugin-health observation. Missing or pruned paths call
+for a reinstall or full Codex restart. The observation is shared between sessions and
+does not prove that the current app-server loaded those paths.
 
 If `alis define|build|deploy` rejects `--json` with `unknown flag`, or prints an interactive
 `You are not logged in.  Log in now? (y|n)` prompt, an older `alis` binary is answering — the current

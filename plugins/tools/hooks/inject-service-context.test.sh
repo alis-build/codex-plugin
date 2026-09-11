@@ -50,7 +50,8 @@ jq -e '
     .matcher == "^(startup|resume|clear|compact)$" and
     ([.hooks[].command] | sort) == ([
       "${PLUGIN_ROOT}/hooks/inject-service-context.sh",
-      "${PLUGIN_ROOT}/hooks/load-primer.sh"
+      "${PLUGIN_ROOT}/hooks/load-primer.sh",
+      "${PLUGIN_ROOT}/hooks/record-plugin-health.sh"
     ] | sort)
   )
 ' "$hook_dir/hooks.json" >/dev/null || {

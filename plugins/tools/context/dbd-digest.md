@@ -20,8 +20,10 @@ hand-roll package-manager environments — `alis packages` handles the private r
 and credentials for you. The working directory is the context — after `alis service new`,
 cd into the `buildFolder` its result reports before continuing. When a conversation
 references an Ideate project (`ideas/<id>`), run `alis ideate context <id>` first.
-`can't reach alis.build` means the command ran inside the sandbox without network: rerun
-it with escalated permissions, don't debug DNS. `unknown flag: --json` on a DBD command or
+`can't reach alis.build` or DNS failure in a restricted sandbox: rerun the same standalone
+command with network permission once. If it still fails, inspect connectivity and the
+platform response. Set the tool's workdir separately; do not chain, pipe, or redirect
+network CLI calls. Prefer `--async` and retain its operation name. `unknown flag: --json` on a DBD command or
 a `Log in now? (y|n)` prompt means an older `alis` binary answered: `which -a alis`, report,
 stop.
 
@@ -34,6 +36,7 @@ match (`distinctive` ≥ 3); no match means no skill and no narration. Generic c
 skill owns execution. After solving something new by hand, the user can say "capture this
 as a skill" and the plugin's `capture` skill saves it for their team.
 
-Production changes need explicit confirmation: a production deploy exits with code 3 until
-re-run with `--confirm-production`, and that flag requires the user's explicit approval —
-never add it yourself.
+Production approval happens in Codex. Prepare the exact built version or pushed commit,
+environments, and branch overrides; ask for explicit approval for that deployment. After
+approval, execute the pinned retry with `--confirm-production` and verify its operation.
+Auto mode, broad implementation intent, and `--approve` are not production consent.

@@ -71,10 +71,15 @@ directory.
   service from the folder they run in. After `alis service new`, change your working
   directory to the `buildFolder` in its result before continuing — the result's `next` and
   `agent` fields carry the exact follow-up commands.
+- **Use one standalone CLI invocation per tool call.** Start with `alis <command>`
+  and put global flags after the command. Pass the working directory separately.
+  Do not prefix `cd`, chain commands, pipe output, redirect it, or wrap network calls in
+  substitutions. Independent tool calls may run in parallel. Prefer `retryArgv` and
+  `retryCwd` when returned; `retry` is the readable equivalent.
 - **Parse stdout only under `--json`.** stdout carries exactly ONE final JSON object (or an
   error envelope — follow its `retry`/`agent` fields); progress streams as NDJSON on
   stderr. Never merge `2>&1` into a JSON parser. Full contract: `alis docs output`.
-- **Never poll with `sleep` loops.** Long operations print an operation name — block on it
+- **Never poll with `sleep` loops.** Start long operations with `--async`, retain the operation name, and block on it
   with `alis operations wait <op> --json` (`--async` results carry the exact command in
   `next`); `alis operations list --active --json` shows what is still running.
 - **Never hand-edit dependency pins or package-manager environments.** No `sed` on
@@ -88,14 +93,18 @@ directory.
   platform-side failure (e.g. a platform-injected credential error like `invalid_grant`) is
   not fixable in the repo — report it and offer `alis support send-message`/`send-session`
   instead of retrying.
-- **Sandbox recovery.** `can't reach alis.build` / `name resolver error: produced zero
-  addresses` means the command ran inside Codex's sandbox without network — the platform
-  is not down. Rerun it with escalated permissions (`sandbox_permissions:
-  "require_escalated"`; the plugin's `alis` rule approves it) instead of debugging DNS.
-  The `workspace-write` sandbox writes only under the directory Codex started in (plus
-  tmp): when that is the build repo, proto edits under `~/alis.build/<org>/define` need
-  approval, or the user adds the define repo to `sandbox_workspace_write.writable_roots`
-  in `~/.codex/config.toml`.
+- **Sandbox recovery.** On `can't reach alis.build` or DNS failure inside a restricted sandbox, rerun the
+  same standalone invocation with `sandbox_permissions: "require_escalated"` once.
+  If that also fails, diagnose connectivity or the platform response; do not repeatedly
+  escalate, relogin, or declare an outage from DNS alone. For a possibly started mutation,
+  inspect its operation before starting another. Writes to a Define repo outside the
+  workspace still need permission or an added writable root.
+- **Use CLI logs and cancellation.** Use `alis logs build|deploy <operation> --json`
+  for execution logs and `alis logs runtime <pkg> -e <env> --since 30m --limit 100 --json`
+  for Cloud Run logs. To stop a stuck build, use `alis operations cancel <operation> --json`
+  and require `stopped: true` before starting replacement work. Deploy cancellation is
+  unsupported. On older CLIs, check `--help` and update before assuming these commands
+  exist. A backend UNIMPLEMENTED response means that backend needs updating.
 - **Two `alis` binaries.** `unknown flag: --json` on define/build/deploy, or an interactive
   `You are not logged in. Log in now? (y|n)` prompt, means an older `alis` answered — the
   current CLI never prompts, it exits 4. Neither escalation nor `alis login` fixes it: run
@@ -108,9 +117,12 @@ directory.
   `alis authorise <org>.<product> --json` once and retry — a one-time repair, not a
   pre-push ritual. Exit code 4 anywhere means signed out → the user runs `alis login`.
   Never edit stored credential files or git auth config by hand.
-- **Production deploys are gated.** A production-targeting deploy exits with code 3 until
-  re-run with `--confirm-production`; that flag requires the user's explicit approval —
-  never add it yourself (`alis docs safety`).
+- **Production approval happens in Codex.** Prepare and inspect the exact built version
+  or pushed commit, target environments, and any branch override. Present the pinned retry
+  command and ask for explicit approval for that deployment. After approval, execute it
+  with `--confirm-production` and verify its operation; do not hand execution to a terminal.
+  Never add the flag before approval. Broad task intent, auto mode, and `--approve` are
+  not production consent. Keep the approved version, environments, and flags unchanged.
 - **The CLI is self-documenting — consult it, don't memorise it.** `alis docs` is the
   complete agent operating manual and the source of truth for flags, output shapes and exit
   codes; the bullets above are the behavioural rules, not a restatement of it.
