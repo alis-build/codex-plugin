@@ -28,6 +28,10 @@
 # escalation. Non-destructive block commands (list, versions, install, upgrade,
 # merge) must therefore keep the broad allow.
 #
+# v6 renames the file from alis-build.rules to alis.rules (the plugin is now
+# published as `alis`). A legacy alis-build.rules carrying our stamp is removed
+# first, so it neither duplicates the rules nor masks the broad allow check.
+#
 # Idempotent via the version stamp: our file is regenerated whenever the stamp
 # is missing or stale, and never touches any other rules file. The broad allow
 # is skipped when the user's own rules already grant it. Note: if Codex loads
@@ -35,11 +39,18 @@
 # session; the first session may prompt once (which Codex then remembers anyway).
 set -euo pipefail
 
-stamp='# alis-build.rules v5'
+stamp='# alis.rules v6'
 
 home="${CODEX_HOME:-$HOME/.codex}"
 dir="$home/rules"
-file="$dir/alis-build.rules"
+file="$dir/alis.rules"
+legacy="$dir/alis-build.rules"
+
+# Remove the file the plugin wrote under its former name (only when it carries
+# our stamp — a user-authored file of that name is left alone).
+if grep -qsF '# alis-build.rules v' "$legacy" 2>/dev/null; then
+  rm -f "$legacy"
+fi
 
 # Current version already installed? Then stop.
 grep -qsF "$stamp" "$file" 2>/dev/null && exit 0
@@ -55,7 +66,7 @@ if grep -rqsE 'prefix_rule\(pattern=\["alis"\]' --exclude="$(basename "$file")" 
   other_has_allow=1
 fi
 
-tmp="$(mktemp "$dir/.alis-build.rules.XXXXXX")"
+tmp="$(mktemp "$dir/.alis.rules.XXXXXX")"
 {
   printf '%s\n' "$stamp"
   printf '%s\n' '# Managed by the Alis Build Codex plugin — regenerated when the version stamp changes.'

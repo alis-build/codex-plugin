@@ -32,7 +32,7 @@ You need:
 Install the Alis Build plugin:
 
 ```sh
-codex plugin marketplace add https://github.com/alis-build/codex-plugin && codex plugin add tools@alis-build && codex
+codex plugin marketplace add https://github.com/alis-build/codex-plugin && codex plugin add tools@alis && codex
 ```
 
 ## Use It
@@ -109,7 +109,7 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   without per-command approval prompts. `alis` subcommands need network access and your local session, which Codex's
   sandbox blocks; the only lever that runs a command unrestricted is an execpolicy allow rule, and a
   plugin manifest cannot declare one. So the hook writes a dedicated, version-stamped
-  `~/.codex/rules/alis-build.rules` (v5) containing a broad `prefix_rule(pattern=["alis"],
+  `~/.codex/rules/alis.rules` (v6) containing a broad `prefix_rule(pattern=["alis"],
   decision="allow")` (skipped if your own rules already grant it), plus prompt rules for
   `alis blocks|block uninstall`, for a flag placed ahead of the block verb (`alis blocks --json
   uninstall …`), and for invocations whose first argument is a root persistent flag (`--approve`,
@@ -155,7 +155,7 @@ Hooks are enabled by default in Codex. If you have disabled them globally, re-en
 from the canonical primer and digest in the Alis Build Claude Code plugin
 (`claude-plugin/plugins/alis-build/context/`). The local differences are harness adaptations
 only: the Skills sections name this plugin's `discover` / `capture` skills instead of
-Claude's `alis-build:*` skills, and the primer gate reads Codex's hook environment
+Claude's `alis:*` skills, and the primer gate reads Codex's hook environment
 (`PLUGIN_ROOT`, `CODEX_PROJECT_DIR`). Lifecycle routing lives in `hooks.json`: primer and
 service context run for `startup`, `resume`, `clear`, and `compact`, while rule installation
 and catalog refresh run only on `startup`. Sync the bodies on each claude-plugin primer release.
@@ -165,7 +165,7 @@ and catalog refresh run only on `startup`. Sync the bodies on each claude-plugin
 If the primer or hooks do not take effect, confirm that the plugin install completed successfully:
 
 ```sh
-codex plugin add tools@alis-build
+codex plugin add tools@alis
 ```
 
 After updating or reinstalling the plugin, start a new Codex thread. Active threads retain the
@@ -212,7 +212,7 @@ Native hook payloads and permission mechanisms remain specific to this agent.
 The `handoff` skill handles "resume on my workstation", lists enrolled destinations, and explains
 how to inspect or cancel a known Claude handoff. **Automatic transfer currently supports
 Claude Code only; this plugin does not transfer Codex sessions.** Start a Claude transfer
-with `/alis-build:handoff` inside the source Claude session. For Codex work, the guide can
+with `/alis:handoff` inside the source Claude session. For Codex work, the guide can
 prepare a continuation summary; files and live processes are not transferred by that summary.
 Keep the laptop awake until the CLI reports `safe_to_close: true`.
 

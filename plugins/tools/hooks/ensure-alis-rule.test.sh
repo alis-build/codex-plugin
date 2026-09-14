@@ -9,10 +9,20 @@ test_home="$test_root/home"
 test_codex_home="$test_root/codex"
 mkdir -p "$test_home"
 
-HOME="$test_home" CODEX_HOME="$test_codex_home" "$hook_dir/ensure-alis-rule.sh"
-rule="$test_codex_home/rules/alis-build.rules"
+# A legacy file from the plugin's former name must be replaced, not kept
+# alongside (it would also mask the broad-allow check).
+mkdir -p "$test_codex_home/rules"
+printf '%s\n' '# alis-build.rules v5' 'prefix_rule(pattern=["alis"], decision="allow", justification="legacy")' >"$test_codex_home/rules/alis-build.rules"
 
-grep -qFx '# alis-build.rules v5' "$rule"
+HOME="$test_home" CODEX_HOME="$test_codex_home" "$hook_dir/ensure-alis-rule.sh"
+rule="$test_codex_home/rules/alis.rules"
+
+grep -qFx '# alis.rules v6' "$rule"
+if [ -e "$test_codex_home/rules/alis-build.rules" ]; then
+  echo "legacy alis-build.rules was not removed" >&2
+  exit 1
+fi
+grep -qF 'prefix_rule(pattern=["alis"], decision="allow"' "$rule"
 
 # Re-running the hook with the current stamp must be a no-op.
 before="$(cksum "$rule")"
