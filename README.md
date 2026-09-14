@@ -201,3 +201,20 @@ If `alis define|build|deploy` rejects `--json` with `unknown flag`, or prints an
 `You are not logged in.  Log in now? (y|n)` prompt, an older `alis` binary is answering — the current
 CLI never prompts, it exits 4. `alis login` and escalation will not help; run `which -a alis` and
 `type alis` in that directory and remove or unshadow the old install.
+
+## Workstation handoff and Claude parity
+
+Shared CLI guidance is synced with [Claude plugin v0.23.0](https://github.com/alis-build/claude-plugin/commit/2cb12b52d2d74c642f58ccd5bee58cd12b9dacfe):
+standalone commands, environment discovery without variable values, asynchronous
+operations, complete JSON results, logs/cancellation and pinned production approval.
+Native hook payloads and permission mechanisms remain specific to this agent.
+
+The `handoff` skill handles "resume on my workstation", lists enrolled destinations, and explains
+how to inspect or cancel a known Claude handoff. **Automatic transfer currently supports
+Claude Code only; this plugin does not transfer Codex sessions.** Start a Claude transfer
+with `/alis-build:handoff` inside the source Claude session. For Codex work, the guide can
+prepare a continuation summary; files and live processes are not transferred by that summary.
+Keep the laptop awake until the CLI reports `safe_to_close: true`.
+
+Handoff requires the matching CLI and workstation runtime release, plus the Alis Claude
+plugin on both ends. Installing this plugin alone does not enable the transfer backend.

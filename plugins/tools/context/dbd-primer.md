@@ -59,9 +59,9 @@ session (`alis docs skills`).
 **Execute DBD through the `alis` CLI.** It is deterministic, auto-detects context, and
 chains steps into one call:
 
-- **Define** (and publish packages): `alis define <pkg> --json --install`
-- **Build** (optionally deploy): `alis build <pkg> --json --deploy -e <env>`
-- **Deploy**: `alis deploy <pkg> --json`
+- **Define** (and publish packages): `alis define <pkg> --json --install --async`
+- **Build** (optionally deploy): `alis build <pkg> --json --deploy -e <env> --async`
+- **Deploy**: `alis deploy <pkg> --version <version> -e <env> --json --async`
 - **Packages**: `alis packages install|upgrade|add <pkg> --json`
 
 `<pkg>` is the package id, e.g. `alis.os.cli.v1`; it may be omitted inside the service's
@@ -76,12 +76,23 @@ directory.
   Do not prefix `cd`, chain commands, pipe output, redirect it, or wrap network calls in
   substitutions. Independent tool calls may run in parallel. Prefer `retryArgv` and
   `retryCwd` when returned; `retry` is the readable equivalent.
+- **Discover environments without values.** Use `alis environment list <org>.<product>
+  --json` for IDs, names, production classification and allowed branches. Request
+  `environment variables` only when the task actually needs variable values.
 - **Parse stdout only under `--json`.** stdout carries exactly ONE final JSON object (or an
   error envelope — follow its `retry`/`agent` fields); progress streams as NDJSON on
-  stderr. Never merge `2>&1` into a JSON parser. Full contract: `alis docs output`.
-- **Never poll with `sleep` loops.** Start long operations with `--async`, retain the operation name, and block on it
+  stderr. Read the whole result: no pipes, `head`, `tail`, `2>&1` or `2>/dev/null`.
+  They can hide failures and replace the CLI's exit code. Full contract: `alis docs output`.
+- **Operation JSON.** Start/wait/describe expose top-level `name`, `done`, `status`,
+  `version`, `notes` and `logsUri` when available (`schemaVersion: 1`). Start also
+  retains legacy `metadata`; do not use that parser for wait/describe. With older
+  CLIs, a missing `done` means false. Check errors before claiming success.
+- **Never poll with `sleep` loops.** Long operations print an operation name — block on it
   with `alis operations wait <op> --json` (`--async` results carry the exact command in
   `next`); `alis operations list --active --json` shows what is still running.
+  Keep the Alis operation name separate from the agent’s local background-task ID. Use the
+  background output handle the agent returns to inspect a wait; stopping that local task
+  never cancels the server operation. Resume the same operation after an auth repair.
 - **Never hand-edit dependency pins or package-manager environments.** No `sed` on
   `go.mod`/`package.json`, no hand-assembled `GOPROXY`/registry settings — that is the main
   reason `go mod tidy`/`pnpm install` fail here. `alis packages install` refreshes registry
@@ -99,16 +110,14 @@ directory.
   escalate, relogin, or declare an outage from DNS alone. For a possibly started mutation,
   inspect its operation before starting another. Writes to a Define repo outside the
   workspace still need permission or an added writable root.
-- **Use CLI logs and cancellation.** Use `alis logs build|deploy <operation> --json`
-  for execution logs and `alis logs runtime <pkg> -e <env> --since 30m --limit 100 --json`
-  for Cloud Run logs. To stop a stuck build, use `alis operations cancel <operation> --json`
-  and require `stopped: true` before starting replacement work. Deploy cancellation is
-  unsupported. On older CLIs, check `--help` and update before assuming these commands
-  exist. A backend UNIMPLEMENTED response means that backend needs updating.
-- **Two `alis` binaries.** `unknown flag: --json` on define/build/deploy, or an interactive
-  `You are not logged in. Log in now? (y|n)` prompt, means an older `alis` answered — the
-  current CLI never prompts, it exits 4. Neither escalation nor `alis login` fixes it: run
-  `which -a alis` / `type alis`, report the shadowing binary and stop.
+- **Logs and cancellation.** With a matching CLI/backend release, use `alis logs
+  build|deploy <op> --json`, `alis logs runtime <pkg> -e <env> --json`, and
+  `alis operations cancel <op> --json` (build only). Confirm `stopped: true` before
+  replacement work. `BACKEND_OUTDATED` requires the matching backend update.
+- **Classify failures.** Legacy private-import DNS failures need package migration;
+  they do not prove an agent sandbox issue. Use `alis doctor --json` and inspect
+  the actual error. If flags are unexpectedly missing, inspect `type -a alis` and
+  update the intended binary. No hand edits to stored credentials or registry config.
 - **Ideate context by reference.** When a conversation references an Alis Ideate project
   (`ideas/<id>`), run `alis ideate context <id>` first — one markdown document with
   everything the project holds; dig with `alis ideate specs|spec|stream|find`

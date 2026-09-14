@@ -1,6 +1,6 @@
 {
   "name": "tools",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "description": "Connect Codex to Alis Build through the alis CLI and workspace context.",
   "author": {
     "name": "Alis Build"
@@ -32,7 +32,7 @@
       "Write"
     ],
     "defaultPrompt": [
-      "find a skill for …",
+      "find a skill for \u2026",
       "capture this as a skill",
       "Use Alis Build to review the latest failed build or deploy logs and suggest the next action."
     ]
