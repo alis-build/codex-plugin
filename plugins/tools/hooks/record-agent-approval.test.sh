@@ -90,7 +90,7 @@ fi
 # The production guard runs first so its deny is decided before the observer
 # records anything; both match Codex's canonical Bash hook tool name.
 jq -e '
-  .hooks.PreToolUse == [{
+  (.hooks.PreToolUse | map(select(.matcher == "^Bash$"))) == [{
     matcher: "^Bash$",
     hooks: [{
       type: "command",

@@ -63,6 +63,8 @@ for f in "$repo"/plugins/tools/hooks/*.test.sh; do
   fi
 done
 
+python3 -B "$repo/tests/test_handoff.py" || fail=1
+
 if [ "$fail" -eq 0 ]; then
   echo "release guard: OK (version $pv)"
 fi
