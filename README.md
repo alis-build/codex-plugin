@@ -160,6 +160,18 @@ Claude's `alis:*` skills, and the primer gate reads Codex's hook environment
 service context run for `startup`, `resume`, `clear`, and `compact`, while rule installation
 and catalog refresh run only on `startup`. Sync the bodies on each claude-plugin primer release.
 
+## Ticket reading and package setup
+
+Read referenced support tickets before proposing changes: use
+`alis specialist get tickets/ID --json`, or find the title with
+`alis specialist tickets --state all --json`. Use `alis packages install`
+for private package setup during Build. Read command results and help in full.
+
+If this guidance is absent after updating, confirm the Alis plugin is enabled
+and restart the agent. The CLI alone does not activate the agent plugin.
+For immediate guidance, read `alis docs specialist` and
+`alis packages install --help`.
+
 ## Troubleshooting
 
 If the primer or hooks do not take effect, confirm that the plugin install completed successfully:

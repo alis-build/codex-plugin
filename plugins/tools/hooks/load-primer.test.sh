@@ -28,8 +28,8 @@ run_hook() { # $1=cwd $2=PATH prefix $3=extra env assignments (or "")
 expect() { # $1=name $2=want(full|digest|none) $3=output
   name="$1" want="$2" out="$3"
   case "$want" in
-    full) echo "$out" | grep -qF "$primer_header" || { echo "FAIL $name: wanted full primer" >&2; exit 1; } ;;
-    digest) echo "$out" | grep -qF "$digest_header" || { echo "FAIL $name: wanted digest" >&2; exit 1; } ;;
+    full) grep -qF "$primer_header" <<< "$out" || { echo "FAIL $name: wanted full primer" >&2; exit 1; } ;;
+    digest) grep -qF "$digest_header" <<< "$out" || { echo "FAIL $name: wanted digest" >&2; exit 1; } ;;
     none) [ -z "$out" ] || { echo "FAIL $name: wanted no output, got: $(echo "$out" | head -1)" >&2; exit 1; } ;;
   esac
 }
@@ -54,9 +54,9 @@ expect "PWD fallback in workspace" full \
 # without it the agent debugs the network instead of asking for escalation
 # when a platform call fails inside the sandbox (ticket 4fd5150f).
 sandbox_marker="can't reach alis.build"
-echo "$(run_hook "$workspace" "$test_dir/emptybin")" | grep -qF "$sandbox_marker" \
+grep -qF "$sandbox_marker" <<< "$(run_hook "$workspace" "$test_dir/emptybin")" \
   || { echo "FAIL full primer: missing sandbox recovery bullet" >&2; exit 1; }
-echo "$(run_hook "$plain" "$test_dir/bin")" | grep -qF "$sandbox_marker" \
+grep -qF "$sandbox_marker" <<< "$(run_hook "$plain" "$test_dir/bin")" \
   || { echo "FAIL digest: missing sandbox recovery bullet" >&2; exit 1; }
 
 echo "load-primer hook: gating matrix verified"
