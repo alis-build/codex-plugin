@@ -45,6 +45,10 @@ Read the result:
   the user clicks into its pane; `herdr update --handoff` fixes that.
 - `TERMINAL_BROWSER_NOT_FOUND`: ask the user before installing (the envelope's
   `agent` field has the command). Meanwhile give them the address.
+- `unknown command "preview"`: this CLI predates `alis preview`. Suggest
+  `alis upgrade`, and meanwhile run
+  `terminal-browser open --split right http://localhost:<port>` yourself, with
+  the port from the service's `.claude/launch.json` or the dev server's output.
 - `PREVIEW_FAILED`: usually a terminal that cannot draw kitty graphics or
   cannot split (iTerm2, a workstation's browser terminal). Suggest Ghostty,
   kitty, WezTerm, tmux or herdr, and give the user the address.
