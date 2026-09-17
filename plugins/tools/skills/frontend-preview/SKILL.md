@@ -41,6 +41,8 @@ Read the result:
   cannot draw the browser. Give the user that address and the `hint`. Do not retry.
 - `guessed: true`: no frontend or port was found, so the page may not answer.
   Tell the user which address you tried.
+- `warnings`: pass them on. herdr older than 0.9.1 shows the page only after
+  the user clicks into its pane; `herdr update --handoff` fixes that.
 - `TERMINAL_BROWSER_NOT_FOUND`: ask the user before installing (the envelope's
   `agent` field has the command). Meanwhile give them the address.
 - `PREVIEW_FAILED`: usually a terminal that cannot draw kitty graphics or
