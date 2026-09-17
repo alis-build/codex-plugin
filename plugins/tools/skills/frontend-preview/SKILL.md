@@ -26,8 +26,8 @@ pane this Codex session runs in.
    folder (inside herdr, a split beside this one) and wait until it listens.
 2. Run `alis preview --json` in the service folder, or
    `alis --cwd <service folder> preview --json` from elsewhere. It opens the
-   service's `.claude/launch.json` port, else the Makefile's `APP_URL`, else
-   `localhost:8080`. Pass `--port <n>` or `--url <address>` when you know better
+   service's `.claude/launch.json` port, else the Makefile's `APP_URL`, else a
+   Vite app's configured port, else `localhost:8080`. Pass `--port <n>` or `--url <address>` when you know better
    (a Vite server on 5173, a route such as `/checkout`).
 3. Dev server on a workstation, agent on this laptop: run
    `alis preview --ssh alis-<org>-<id> --port <n> --json`. The browser stays
