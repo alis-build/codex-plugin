@@ -71,7 +71,23 @@ the full command reference.
 - Always finish with `terminal-browser action done`, which clears the
   "agent is driving" glow the user sees.
 
-## 3. The user points at something
+## 3. Close it only when asked
+
+Leave the preview open when you finish; the user keeps watching it. Close it
+only when the user asks, and only this way:
+
+- `terminal-browser action -- tab close` closes the current tab
+  (`tab close <id>` another; `terminal-browser ls` lists the ids). Closing the
+  last tab quits the browser. A `prefix+f` pane closes with it; a pane opened
+  by `alis preview` returns to its shell prompt, and `herdr pane close <id>`
+  removes it if the user wants that too (`terminal-browser ls --json` shows
+  the pane id while the browser runs).
+- Never `terminal-browser action -- close`: it prints "Browser closed" but
+  only disconnects you, and the browser stays open.
+- Never `terminal-browser shutdown`: it closes every browser on the machine,
+  including other sessions'.
+
+## 4. The user points at something
 
 The user can select an element in the browser and send it to you (ctrl+g, or
 right-click and "send to agent"). It arrives as a message starting with `> `
