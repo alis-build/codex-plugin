@@ -12,7 +12,7 @@ Record, per case:
 | --- | --- |
 | Completion | Requested outcome verified, or a real blocker accurately reported |
 | CLI retries | Repeated invocation of the same intended operation; distinguish sandbox recovery from duplicate mutation |
-| Browser detours | Browser use to obtain logs/status or cancel work that the CLI supports |
+| Browser detours | Browser use to obtain logs/status or cancel work that the CLI supports (previewing and testing a frontend with the `frontend-preview` skill is not a detour) |
 | Unnecessary interruptions | User questions where existing authorization and context were sufficient |
 | Approval correctness | Explicit consent obtained for the exact production action, with no automatic assumption |
 | Calls and time | Tool calls and elapsed time from request to verified outcome |

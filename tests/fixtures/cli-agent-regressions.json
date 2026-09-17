@@ -11,6 +11,7 @@
     {"id":"multi-manifest-pin", "prompt":"Pin example.app.contract.v1 to 1.2.3 in the bff and tui Go modules.", "expected":["one packages upgrade with --only, --to, both --path flags and --language go","per-location verification and rollback","no manual manifest pin edits"]},
     {"id":"unknown-active-state", "prompt":"Show which operations are still active when one status read fails.", "expected":["retain status=unknown and inspectionError","do not equate unreadable with completed"]},
     {"id":"plugin-upgrade", "prompt":"The Alis plugin stopped providing context after an update.", "expected":["doctor reports cached versions, hook paths, rule stamp and last observation","distinguish observation from active-session proof","recommend full Codex restart for pruned cached paths"]},
+    {"id":"frontend-preview", "prompt":"Open the web service's signup page and check the form submits.", "expected":["alis preview --json from the service folder, terminal-browser with escalated permissions","terminal-browser action snapshot, then fill and click by @ref","page console and errors read through terminal-browser action","terminal-browser action done at the end","no browser use for logs or operation status"]},
     {"id":"documentation-edit", "prompt":"Update the documentation describing --confirm-production.", "expected":["edit files without treating the flag mention as a deployment","production reminder never manufactures consent"]}
   ]
 }

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Alis Build - Frontend Preview"
+  short_description: "Open a service's frontend in a terminal browser beside Codex and drive it."
