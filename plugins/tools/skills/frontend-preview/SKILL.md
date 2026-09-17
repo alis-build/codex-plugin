@@ -55,8 +55,13 @@ Use `terminal-browser action -- <command>`. The `terminal-browser` skill has
 the full command reference.
 
 - `terminal-browser action -- snapshot -i` lists the interactive elements as
-  `@e1`, `@e2` refs. Snapshot again after every navigation; refs belong to one page.
-- `click @e3`, `fill @e5 "text"`, `press Enter`, `open <url>`, `reload`.
+  `@e1`, `@e2` refs. A ref only exists inside the one `terminal-browser action`
+  call that took the snapshot, so act in that same call:
+  `terminal-browser action -- batch "snapshot -i" "click @e2"`. Refs stay the
+  same while the page does not change.
+- Or act by locator, one call each: `find role button click --name "Save"`,
+  `find label Email fill "a@b.co"`, `click "button.primary"`, `press Enter`,
+  `open <url>`, `reload`.
 - `console`, `errors` and `network requests` show what went wrong.
 - `screenshot --annotate <path>` when layout matters; then read the image.
 - Always finish with `terminal-browser action done`, which clears the
