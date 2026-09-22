@@ -17,7 +17,7 @@ printf '%s\n' '# alis-build.rules v5' 'prefix_rule(pattern=["alis"], decision="a
 HOME="$test_home" CODEX_HOME="$test_codex_home" "$hook_dir/ensure-alis-rule.sh"
 rule="$test_codex_home/rules/alis.rules"
 
-grep -qFx '# alis.rules v6' "$rule"
+grep -qFx '# alis.rules v7' "$rule"
 if [ -e "$test_codex_home/rules/alis-build.rules" ]; then
   echo "legacy alis-build.rules was not removed" >&2
   exit 1
@@ -91,3 +91,21 @@ assert_decision prompt alis -v
 assert_decision prompt alis --json blocks uninstall blocks/example --yes
 assert_decision prompt alis --json blocks uninstall blocks/example --approve
 assert_decision prompt alis --json --approve blocks uninstall blocks/example --yes
+
+# Secret-printing environment commands prompt (ticket 4531a10b): variables|vars
+# print every value on CLIs before 1.146.1 and behind --reveal since, and
+# refresh writes or prints the .env. A flag ahead of the verb could reorder
+# them past the rule, so a flag-leading environment invocation prompts too.
+# The rest of the environment namespace keeps the broad allow.
+assert_decision prompt alis environment variables alis.os
+assert_decision prompt alis env vars alis.os --json
+assert_decision prompt alis envs variables alis.os --reveal -e production
+assert_decision prompt alis environments refresh alis.os --output .env
+assert_decision prompt alis environment refresh alis.os --reveal --approve
+assert_decision prompt alis environment --json variables alis.os
+assert_decision prompt alis env --cwd /tmp/x refresh alis.os
+assert_decision prompt alis env --reveal vars alis.os
+assert_decision allow alis environment list alis.os --json
+assert_decision allow alis environment set dev KEY=1 --json
+assert_decision allow alis env unset dev KEY --json
+assert_decision allow alis environment new alis.os --region europe-west1 --json

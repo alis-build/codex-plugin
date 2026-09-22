@@ -55,17 +55,35 @@ approval_words="${approval_words//\"/}"
 approval_words="${approval_words//\'/}"
 approval_words="${approval_words//\$/}"
 read -r -a approval_argv <<<"$approval_words"
+# The same holds for commands that print or write environment secret values
+# (`environment variables|vars|refresh`, any `--reveal`): without a standing
+# grant the CLI's approval ladder needs an explicit --approve, which the
+# person then sees in the execpolicy prompt (ticket 4531a10b).
 saw_blocks=0
+saw_env=0
 for word in "${approval_argv[@]}"; do
   case "$word" in
     blocks | block)
       saw_blocks=1
+      ;;
+    environment | environments | env | envs)
+      saw_env=1
       ;;
     uninstall)
       if [ "$saw_blocks" -eq 1 ]; then
         rm -f "$HOME/.alis/agent-approval.json" 2>/dev/null || true
         exit 0
       fi
+      ;;
+    variables | vars | refresh)
+      if [ "$saw_env" -eq 1 ]; then
+        rm -f "$HOME/.alis/agent-approval.json" 2>/dev/null || true
+        exit 0
+      fi
+      ;;
+    --reveal | --reveal=*)
+      rm -f "$HOME/.alis/agent-approval.json" 2>/dev/null || true
+      exit 0
       ;;
   esac
 done

@@ -44,6 +44,26 @@ assert_not_recorded() {
 assert_recorded "alis build alis.os.console.v2 --json"
 assert_recorded "alis --json blocks list"
 assert_recorded "alis ask uninstall blocks"
+assert_recorded "alis environment list alis.os --json"
+assert_recorded "alis env set dev KEY=1 --json"
+assert_recorded "alis ask reveal variables"
+
+# Commands that print or write secret values never receive a standing grant
+# either: the CLI's own approval ladder then needs an explicit --approve the
+# person sees in the execpolicy prompt (ticket 4531a10b).
+secret_commands=(
+  "alis environment variables alis.os"
+  "alis env vars alis.os --json"
+  "alis environments variables alis.os --reveal -e production"
+  "alis environment refresh alis.os --output .env"
+  "alis --json environment variables alis.os"
+  "alis environment --json refresh alis.os"
+  'alis "environment" "variables" alis.os'
+  "alis whoami --reveal"
+)
+for cmd in "${secret_commands[@]}"; do
+  assert_not_recorded "$cmd"
+done
 
 # Persistent flags are valid in multiple positions. None of these destructive
 # spellings may receive an automatic standing grant.

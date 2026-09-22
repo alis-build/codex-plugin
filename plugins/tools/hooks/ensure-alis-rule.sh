@@ -32,6 +32,14 @@
 # published as `alis`). A legacy alis-build.rules carrying our stamp is removed
 # first, so it neither duplicates the rules nor masks the broad allow check.
 #
+# v7 adds prompt rules for the commands that print or write environment
+# secret values (ticket 4531a10b: `alis environment variables` printed every
+# production secret into an agent transcript). `variables|vars` print values
+# on CLIs before 1.146.1 and behind --reveal since, and `refresh` writes or
+# prints the .env; a rule cannot see the CLI version or a trailing --reveal,
+# so the bare verbs prompt, plus a flag-leading environment invocation that
+# could reorder them. list, set, unset, new and the rest keep the allow.
+#
 # Idempotent via the version stamp: our file is regenerated whenever the stamp
 # is missing or stale, and never touches any other rules file. The broad allow
 # is skipped when the user's own rules already grant it. Note: if Codex loads
@@ -39,7 +47,7 @@
 # session; the first session may prompt once (which Codex then remembers anyway).
 set -euo pipefail
 
-stamp='# alis.rules v6'
+stamp='# alis.rules v7'
 
 home="${CODEX_HOME:-$HOME/.codex}"
 dir="$home/rules"
@@ -79,6 +87,9 @@ tmp="$(mktemp "$dir/.alis.rules.XXXXXX")"
   # A flag ahead of the verb (root persistent flags and every uninstall flag)
   # could reorder `uninstall` past the rule above.
   printf '%s\n' 'prefix_rule(pattern=["alis", ["blocks", "block"], ["--approve", "--json", "--yes", "--verbose", "--quiet", "--instance", "--timeout", "--poll-interval", "--help", "-h"]], decision="prompt", justification="Flag-leading block invocation may reorder a destructive uninstall — human confirmation required", match=["alis blocks --json uninstall block-id --yes", "alis block --approve uninstall block-id"], not_match=["alis blocks install block-id --json", "alis blocks uninstall block-id"])'
+  # Environment commands that print or write secret values (see header).
+  printf '%s\n' 'prefix_rule(pattern=["alis", ["environment", "environments", "env", "envs"], ["variables", "vars", "refresh"]], decision="prompt", justification="Prints or writes environment secret values into the transcript — human confirmation required", match=["alis environment variables alis.os", "alis env vars alis.os --reveal -e production", "alis environment refresh alis.os --output .env"], not_match=["alis environment list alis.os --json", "alis env set dev KEY=1 --json", "alis build package --json"])'
+  printf '%s\n' 'prefix_rule(pattern=["alis", ["environment", "environments", "env", "envs"], ["--approve", "--json", "--yes", "--verbose", "--quiet", "--cwd", "--session-id", "--reveal", "--output", "-o", "-e", "--name", "--confirm-production", "--help", "-h"]], decision="prompt", justification="Flag-leading environment invocation may reorder a secret-printing command — human confirmation required", match=["alis environment --json variables alis.os", "alis env --reveal vars alis.os"], not_match=["alis environment list alis.os --json", "alis environment variables alis.os"])'
   printf '%s\n' 'prefix_rule(pattern=["alis", ["--approve", "--json", "--verbose", "--help", "-h", "--version", "-v"]], decision="prompt", justification="Flag-leading Alis invocation may reorder or pre-approve a destructive command — human confirmation required", match=["alis --json blocks uninstall block-id --yes", "alis --verbose blocks uninstall block-id", "alis --approve build package", "alis -h"], not_match=["alis build package --json", "alis blocks list"])'
 } >"$tmp"
 mv -f "$tmp" "$file"

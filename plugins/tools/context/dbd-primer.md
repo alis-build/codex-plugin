@@ -95,8 +95,9 @@ directory.
   substitutions. Independent tool calls may run in parallel. Prefer `retryArgv` and
   `retryCwd` when returned; `retry` is the readable equivalent.
 - **Discover environments without values.** Use `alis environment list <org>.<product>
-  --json` for IDs, names, production classification and allowed branches. Request
-  `environment variables` only when the task actually needs variable values.
+  --json` for IDs, names, production classification and allowed branches.
+  `environment variables` lists names only; `--reveal` prints values, asks for
+  confirmation, and lands them in the transcript. Reveal only when the task needs a value.
 - **Parse stdout only under `--json`.** stdout carries exactly ONE final JSON object (or an
   error envelope — follow its `retry`/`agent` fields); progress streams as NDJSON on
   stderr. Read the whole result: no pipes, `head`, `tail`, `2>&1` or `2>/dev/null`.
