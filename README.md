@@ -110,14 +110,18 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   without per-command approval prompts. `alis` subcommands need network access and your local session, which Codex's
   sandbox blocks; the only lever that runs a command unrestricted is an execpolicy allow rule, and a
   plugin manifest cannot declare one. So the hook writes a dedicated, version-stamped
-  `~/.codex/rules/alis.rules` (v6) containing a broad `prefix_rule(pattern=["alis"],
+  `~/.codex/rules/alis.rules` (v7) containing a broad `prefix_rule(pattern=["alis"],
   decision="allow")` (skipped if your own rules already grant it), plus prompt rules for
   `alis blocks|block uninstall`, for a flag placed ahead of the block verb (`alis blocks --json
-  uninstall …`), and for invocations whose first argument is a root persistent flag (`--approve`,
-  `--json`, `--verbose`, `--help`, `-h`, `--version`, `-v`). Execpolicy's most-restrictive-wins
-  therefore prompts every uninstall spelling, including explicit `--yes`/`--approve` attempts, while
-  `alis blocks install|list|versions|upgrade|merge` and canonical commands such as
-  `alis build … --json` retain the broad allow. That narrowness matters: under Codex's on-request
+  uninstall …`), for the commands that print or write environment secret values
+  (`alis environment|env variables|vars|refresh`, and a flag placed ahead of that verb), and for
+  invocations whose first argument is a root persistent flag (`--approve`, `--json`, `--verbose`,
+  `--help`, `-h`, `--version`, `-v`). Execpolicy's most-restrictive-wins therefore prompts every
+  uninstall spelling, including explicit `--yes`/`--approve` attempts, and every reveal of
+  environment values (the CLI masks them by default since 1.146.1 and prints them only behind
+  `--reveal`; a rule cannot see the CLI version or a trailing flag, so the bare verbs prompt too),
+  while `alis blocks install|list|versions|upgrade|merge`, `alis environment list|set|unset|new`
+  and canonical commands such as `alis build … --json` retain the broad allow. That narrowness matters: under Codex's on-request
   approval a prompt rule does not prompt by itself — a command the agent has not flagged for
   escalation runs silently inside the sandbox, where every platform call fails on DNS. v4 covered
   the whole `blocks` namespace and so turned a plain `alis blocks install` into a network error.
@@ -136,16 +140,30 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   permission mode, session id, and exact command). It is an observer only — execpolicy owns shell
   approval — and lets the alis CLI treat a fresh record from the same `CODEX_THREAD_ID` in
   `acceptEdits`, `dontAsk`, or `bypassPermissions` mode as a standing grant for non-production
-  approvals. Destructive block uninstalls never receive that automatic grant, regardless of flag
-  order. `default` and `plan` do not grant approval. Production deploys always require
-  explicit user approval before the agent supplies `--confirm-production`.
+  approvals. Destructive block uninstalls and the commands that print or write environment
+  secret values (`environment variables|vars|refresh`, any `--reveal`) never receive that
+  automatic grant, regardless of flag order, so the CLI's own approval ladder needs an explicit
+  `--approve` that you see in the execpolicy prompt. `default` and `plan` do not grant approval.
+  Production deploys always require explicit user approval before the agent supplies
+  `--confirm-production`.
 - **Production approval in Codex.** The `guard-production.sh` hook reminds the agent
-  to obtain explicit approval for the prepared, pinned deployment. After you approve that
+  to obtain explicit approval for the prepared, pinned deployment, or, when the command carries
+  `--reveal`, for revealing a production environment's secret values. After you approve that
   deployment in Codex, the agent executes it and verifies its operation. The hook cannot
   inspect conversational consent and emits neither `allow` nor `deny`; it is a reminder,
   not a technical attestation of approval. The CLI still exits 3 without
   `--confirm-production`. Auto mode, `--approve`, and general implementation instructions
   do not grant production consent.
+- **Secrets warning.** After every tool call, a `PostToolUse` hook (`warn-secrets.sh`) looks for
+  secret-looking values in the result and in the call's own arguments: Stripe, GitHub, npm, PyPI,
+  Linear, SendGrid, AWS, Google and Slack keys, connection strings with passwords, private keys,
+  `NAME=value` lines whose upper-case name says secret, and every row an
+  `alis environment … --reveal` printed. A hit cannot be unprinted, so the hook shows you which
+  kinds landed and that they need rotating (`systemMessage`), and tells the agent not to repeat
+  them (`additionalContext`). Values never appear in the warning, and a value already warned about
+  in the session (hashes under `~/.alis/claude-secrets-seen/<session>`) is not warned about again.
+  The CLI masks its own uploads and `environment variables` output since 1.146.1; this covers
+  `cat .env`, `printenv`, a written `.env` and the like.
 
 Hooks are enabled by default in Codex. If you have disabled them globally, re-enable them by removing
 `[features].hooks = false` from `~/.codex/config.toml`.
@@ -160,6 +178,9 @@ Claude's `alis:*` skills, and the primer gate reads Codex's hook environment
 (`PLUGIN_ROOT`, `CODEX_PROJECT_DIR`). Lifecycle routing lives in `hooks.json`: primer and
 service context run for `startup`, `resume`, `clear`, and `compact`, while rule installation
 and catalog refresh run only on `startup`. Sync the bodies on each claude-plugin primer release.
+`hooks/warn-secrets.sh` and `hooks/secrets-hook.py` are verbatim copies of the Claude plugin's
+shell-path secrets warning (`claude-plugin/plugins/alis-build/hooks/`); sync them together with
+the primer, and keep `hooks/warn-secrets.test.sh` in step with that plugin's samples.
 
 ## Ticket reading and package setup
 
