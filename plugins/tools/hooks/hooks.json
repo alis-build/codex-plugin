@@ -102,6 +102,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PLUGIN_ROOT}/hooks/warn-secrets.sh",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "Stop": [
