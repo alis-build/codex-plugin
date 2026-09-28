@@ -76,17 +76,19 @@ the full command reference.
 Leave the preview open when you finish; the user keeps watching it. Close it
 only when the user asks, and only this way:
 
-- `terminal-browser action -- tab close` closes the current tab
-  (`tab close <id>` another; `terminal-browser ls` lists the ids). Closing the
-  last tab quits the browser. A `prefix+f` pane closes with it. A split
-  opened by `alis preview` asks the user whether to close it in Ghostty; in
-  herdr it returns to its shell prompt, and `herdr pane close <id>` removes it
-  if the user wants that too (`terminal-browser ls --json` shows the pane id
-  while the browser runs).
+- Inside herdr, close the pane: `terminal-browser ls --json` gives this
+  browser's pane id (`browsers[].pane.pane`, such as `w5:p11`), and
+  `herdr pane close <id>` closes the pane and the browser with it.
+- Elsewhere (a Ghostty split), `terminal-browser action -- tab close` closes
+  the page, but closing the last tab leaves a blank tab open. Tell the user
+  to close the split themselves.
+- To close one of several tabs, `terminal-browser action -- tab close <id>`
+  (`terminal-browser ls` lists the ids).
 - Never `terminal-browser action -- close`: it prints "Browser closed" but
   only disconnects you, and the browser stays open.
-- Never `terminal-browser shutdown`: it closes every browser on the machine,
-  including other sessions'.
+- Never `terminal-browser shutdown`, and never kill the `pid` that `ls`
+  reports: that pid is the daemon behind every browser on the machine, so
+  both close other sessions' browsers too.
 
 ## 4. The user points at something
 
