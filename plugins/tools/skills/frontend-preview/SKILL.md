@@ -2,7 +2,8 @@
 name: frontend-preview
 description: >-
   Show an Alis service's web frontend in a real browser beside the
-  conversation (terminal-browser) and drive it: open the page, click through
+  conversation (terminal-browser, or a workstation shell's Preview pane) and
+  drive it: open the page, click through
   it, read its console and errors, screenshot it, check a UI change. Use when
   the user asks to see, open, preview, check or test the app, a page, a form
   or a UI change of a service with a web frontend, or sends an element from
@@ -37,6 +38,14 @@ pane this Codex session runs in.
 Read the result:
 
 - `opened: true`: the page is beside the conversation. Go to step 2.
+- `preview_pane: true`: this is a workstation whose shell has a browser
+  Preview pane, showing the browser your `playwright` MCP tools drive. Open
+  the result's `url` with `browser_navigate` and drive it with the same tools
+  (`browser_snapshot`, `browser_click`, `browser_type`,
+  `browser_console_messages`, `browser_take_screenshot`), not
+  `terminal-browser`; skip step 2. If the person is not watching, pass on the
+  `hint`: they click Preview in the browser shell (`shell_url`). Leave the
+  page open when you finish.
 - `workstation_url`: this machine is a workstation, whose browser terminal
   cannot draw the browser. Give the user that address and the `hint`. Do not retry.
 - `guessed: true`: no frontend or port was found, so the page may not answer.
@@ -99,7 +108,9 @@ it as the thing to change: find it in the code, change it, then reload the
 page and check the result.
 
 Inside herdr the user can also press `prefix+f` to open the same preview
-beside any pane.
+beside any pane. A workstation shell's Preview pane sends the same kind of
+message from its Annotate button; check the result there with your
+`playwright` tools.
 
 ## Not for
 
