@@ -17,7 +17,7 @@ printf '%s\n' '# alis-build.rules v5' 'prefix_rule(pattern=["alis"], decision="a
 HOME="$test_home" CODEX_HOME="$test_codex_home" "$hook_dir/ensure-alis-rule.sh"
 rule="$test_codex_home/rules/alis.rules"
 
-grep -qFx '# alis.rules v7' "$rule"
+grep -qFx '# alis.rules v8' "$rule"
 if [ -e "$test_codex_home/rules/alis-build.rules" ]; then
   echo "legacy alis-build.rules was not removed" >&2
   exit 1
@@ -79,15 +79,27 @@ assert_decision prompt alis blocks --verbose uninstall blocks/example
 assert_decision prompt alis blocks --quiet uninstall blocks/example
 assert_decision prompt alis blocks --instance blocks/example/instances/1 uninstall blocks/example
 
-# Every current root persistent flag prompts when it is the first argument.
-# This closes flag-order bypasses while leaving command-first forms above alone.
+# Root persistent flags that can precede a verb prompt when they are the first
+# argument. This closes flag-order bypasses while leaving command-first forms
+# above alone.
 assert_decision prompt alis --approve build alis.os.console.v2
 assert_decision prompt alis --json build alis.os.console.v2
 assert_decision prompt alis --verbose blocks uninstall blocks/example
-assert_decision prompt alis --help
-assert_decision prompt alis -h
-assert_decision prompt alis --version
-assert_decision prompt alis -v
+
+# Help and version are terminal: cobra rejects any subcommand placed after a
+# leading --help/-h/--version/-v ("unknown command"), so they can never carry a
+# destructive verb and stay on the broad allow (v8). The primer asks agents to
+# consult --help, so prompting here was pure friction.
+assert_decision allow alis --help
+assert_decision allow alis -h
+assert_decision allow alis --version
+assert_decision allow alis -v
+assert_decision allow alis --help blocks uninstall blocks/example
+assert_decision allow alis blocks --help
+assert_decision allow alis block -h
+assert_decision allow alis environment --help
+assert_decision allow alis env -h
+assert_decision allow alis service --help
 assert_decision prompt alis --json blocks uninstall blocks/example --yes
 assert_decision prompt alis --json blocks uninstall blocks/example --approve
 assert_decision prompt alis --json --approve blocks uninstall blocks/example --yes
@@ -109,3 +121,6 @@ assert_decision allow alis environment list alis.os --json
 assert_decision allow alis environment set dev KEY=1 --json
 assert_decision allow alis env unset dev KEY --json
 assert_decision allow alis environment new alis.os --region europe-west1 --json
+# Residual: a prefix rule cannot see a trailing --help, so help on the secret
+# verbs themselves still prompts. Documented, not fixable in execpolicy.
+assert_decision prompt alis environment variables --help

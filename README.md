@@ -110,13 +110,16 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   without per-command approval prompts. `alis` subcommands need network access and your local session, which Codex's
   sandbox blocks; the only lever that runs a command unrestricted is an execpolicy allow rule, and a
   plugin manifest cannot declare one. So the hook writes a dedicated, version-stamped
-  `~/.codex/rules/alis.rules` (v7) containing a broad `prefix_rule(pattern=["alis"],
+  `~/.codex/rules/alis.rules` (v8) containing a broad `prefix_rule(pattern=["alis"],
   decision="allow")` (skipped if your own rules already grant it), plus prompt rules for
   `alis blocks|block uninstall`, for a flag placed ahead of the block verb (`alis blocks --json
   uninstall …`), for the commands that print or write environment secret values
   (`alis environment|env variables|vars|refresh`, and a flag placed ahead of that verb), and for
-  invocations whose first argument is a root persistent flag (`--approve`, `--json`, `--verbose`,
-  `--help`, `-h`, `--version`, `-v`). Execpolicy's most-restrictive-wins therefore prompts every
+  invocations whose first argument is a root persistent flag that can precede a verb (`--approve`,
+  `--json`, `--verbose`). Help and version flags (`--help`, `-h`, `--version`, `-v`) stay on the
+  broad allow wherever they appear: cobra rejects any subcommand placed after them, so they can
+  never carry a destructive verb, and the primer asks agents to consult `--help`. Execpolicy's
+  most-restrictive-wins therefore prompts every
   uninstall spelling, including explicit `--yes`/`--approve` attempts, and every reveal of
   environment values (the CLI masks them by default since 1.146.1 and prints them only behind
   `--reveal`; a rule cannot see the CLI version or a trailing flag, so the bare verbs prompt too),

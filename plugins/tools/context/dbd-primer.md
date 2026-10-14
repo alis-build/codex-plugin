@@ -91,8 +91,10 @@ directory.
   `agent` fields carry the exact follow-up commands.
 - **Use one standalone CLI invocation per tool call.** Start with `alis <command>`
   and put global flags after the command. Pass the working directory separately.
-  Do not prefix `cd`, chain commands, pipe output, redirect it, or wrap network calls in
-  substitutions. Independent tool calls may run in parallel. Prefer `retryArgv` and
+  Do not prefix `cd`, an environment assignment (`VAR=… alis …`) or `env`, chain commands,
+  pipe output, redirect it, or wrap network calls in substitutions: the `alis` allow rule
+  matches the first token only, so any other shape runs sandboxed, fails on DNS and costs
+  an approval. Independent tool calls may run in parallel. Prefer `retryArgv` and
   `retryCwd` when returned; `retry` is the readable equivalent.
 - **Discover environments without values.** Use `alis environment list <org>.<product>
   --json` for IDs, names, production classification and allowed branches.

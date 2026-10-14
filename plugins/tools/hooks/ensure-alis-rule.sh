@@ -40,6 +40,14 @@
 # so the bare verbs prompt, plus a flag-leading environment invocation that
 # could reorder them. list, set, unset, new and the rest keep the allow.
 #
+# v8 drops --help/-h/--version/-v from every flag-leading list. Cobra rejects a
+# subcommand placed after a leading help or version flag (`alis --help blocks
+# uninstall x` exits "unknown command"), so those spellings can never carry a
+# destructive verb, while a leading --json/--approve/--verbose does reach it.
+# Prompting on them bought no safety and, with most-restrictive-wins, sent
+# every `alis --help` and `alis environment --help` the primer asks agents to
+# consult through an approval (51 of 173 alis approvals in October 2026).
+#
 # Idempotent via the version stamp: our file is regenerated whenever the stamp
 # is missing or stale, and never touches any other rules file. The broad allow
 # is skipped when the user's own rules already grant it. Note: if Codex loads
@@ -47,7 +55,7 @@
 # session; the first session may prompt once (which Codex then remembers anyway).
 set -euo pipefail
 
-stamp='# alis.rules v7'
+stamp='# alis.rules v8'
 
 home="${CODEX_HOME:-$HOME/.codex}"
 dir="$home/rules"
@@ -86,11 +94,11 @@ tmp="$(mktemp "$dir/.alis.rules.XXXXXX")"
   printf '%s\n' 'prefix_rule(pattern=["alis", ["blocks", "block"], "uninstall"], decision="prompt", justification="Block uninstall is destructive — human confirmation required", match=["alis blocks uninstall block-id", "alis block uninstall block-id --json --yes"], not_match=["alis blocks install block-id --json", "alis blocks list", "alis build package --json"])'
   # A flag ahead of the verb (root persistent flags and every uninstall flag)
   # could reorder `uninstall` past the rule above.
-  printf '%s\n' 'prefix_rule(pattern=["alis", ["blocks", "block"], ["--approve", "--json", "--yes", "--verbose", "--quiet", "--instance", "--timeout", "--poll-interval", "--help", "-h"]], decision="prompt", justification="Flag-leading block invocation may reorder a destructive uninstall — human confirmation required", match=["alis blocks --json uninstall block-id --yes", "alis block --approve uninstall block-id"], not_match=["alis blocks install block-id --json", "alis blocks uninstall block-id"])'
+  printf '%s\n' 'prefix_rule(pattern=["alis", ["blocks", "block"], ["--approve", "--json", "--yes", "--verbose", "--quiet", "--instance", "--timeout", "--poll-interval"]], decision="prompt", justification="Flag-leading block invocation may reorder a destructive uninstall — human confirmation required", match=["alis blocks --json uninstall block-id --yes", "alis block --approve uninstall block-id"], not_match=["alis blocks install block-id --json", "alis blocks uninstall block-id", "alis blocks --help"])'
   # Environment commands that print or write secret values (see header).
   printf '%s\n' 'prefix_rule(pattern=["alis", ["environment", "environments", "env", "envs"], ["variables", "vars", "refresh"]], decision="prompt", justification="Prints or writes environment secret values into the transcript — human confirmation required", match=["alis environment variables alis.os", "alis env vars alis.os --reveal -e production", "alis environment refresh alis.os --output .env"], not_match=["alis environment list alis.os --json", "alis env set dev KEY=1 --json", "alis build package --json"])'
-  printf '%s\n' 'prefix_rule(pattern=["alis", ["environment", "environments", "env", "envs"], ["--approve", "--json", "--yes", "--verbose", "--quiet", "--cwd", "--session-id", "--reveal", "--output", "-o", "-e", "--name", "--confirm-production", "--help", "-h"]], decision="prompt", justification="Flag-leading environment invocation may reorder a secret-printing command — human confirmation required", match=["alis environment --json variables alis.os", "alis env --reveal vars alis.os"], not_match=["alis environment list alis.os --json", "alis environment variables alis.os"])'
-  printf '%s\n' 'prefix_rule(pattern=["alis", ["--approve", "--json", "--verbose", "--help", "-h", "--version", "-v"]], decision="prompt", justification="Flag-leading Alis invocation may reorder or pre-approve a destructive command — human confirmation required", match=["alis --json blocks uninstall block-id --yes", "alis --verbose blocks uninstall block-id", "alis --approve build package", "alis -h"], not_match=["alis build package --json", "alis blocks list"])'
+  printf '%s\n' 'prefix_rule(pattern=["alis", ["environment", "environments", "env", "envs"], ["--approve", "--json", "--yes", "--verbose", "--quiet", "--cwd", "--session-id", "--reveal", "--output", "-o", "-e", "--name", "--confirm-production"]], decision="prompt", justification="Flag-leading environment invocation may reorder a secret-printing command — human confirmation required", match=["alis environment --json variables alis.os", "alis env --reveal vars alis.os"], not_match=["alis environment list alis.os --json", "alis environment variables alis.os", "alis environment --help"])'
+  printf '%s\n' 'prefix_rule(pattern=["alis", ["--approve", "--json", "--verbose"]], decision="prompt", justification="Flag-leading Alis invocation may reorder or pre-approve a destructive command — human confirmation required", match=["alis --json blocks uninstall block-id --yes", "alis --verbose blocks uninstall block-id", "alis --approve build package"], not_match=["alis build package --json", "alis blocks list", "alis --help", "alis -h", "alis --version", "alis -v"])'
 } >"$tmp"
 mv -f "$tmp" "$file"
 exit 0
