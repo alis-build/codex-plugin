@@ -27,7 +27,10 @@ self-documenting: `alis docs` and `alis <cmd> --help` are the source of truth. U
 hand-roll package-manager environments — `alis packages` handles the private registries
 and credentials for you. The working directory is the context — after `alis service new`,
 pass its `buildFolder` as the tool working directory before continuing. When a conversation
-references an Ideate project (`ideas/<id>`), run `alis ideate context <id>` first.
+references an Ideate project (`ideas/<id>`), run `alis ideate context <id>` first. Sharing an
+HTML page, report or file as a link is `alis artifacts create <folder> --title …
+--publish [--password-file <f> | --emails …] --json` (private, versioned, branded;
+bundle assets locally), not a Cloud Run deployment — see `alis docs artifacts`.
 
 `can't reach alis.build` or DNS failure in a restricted sandbox: rerun the same standalone
 command with network permission once. If it still fails, inspect connectivity and the

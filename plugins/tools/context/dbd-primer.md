@@ -142,6 +142,13 @@ directory.
   they do not prove an agent sandbox issue. Use `alis doctor --json` and inspect
   the actual error. If flags are unexpectedly missing, inspect `type -a alis` and
   update the intended binary. No hand edits to stored credentials or registry config.
+- **Sharing a page or file is `alis artifacts`, not a deployment.** "Share this
+  page", "send them a link", "publish this HTML", "password-protect it", "put this
+  static page on Cloud Run", or an editor artifact link to "make an Alis artifact
+  of": `alis artifacts create <folder> --title … --publish [--password-file <f> |
+  --emails …] --json` returns a branded link to a private, versioned artifact —
+  open, password, verified-email or expiring. Bundle every asset locally (no CDNs,
+  no server); Cloud Run is only for pages that need a backend (`alis docs artifacts`).
 - **Ideate context by reference.** When a conversation references an Alis Ideate project
   (`ideas/<id>`), run `alis ideate context <id>` first — one markdown document with
   everything the project holds; dig with `alis ideate specs|spec|stream|find`

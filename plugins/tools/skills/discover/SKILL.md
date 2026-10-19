@@ -6,12 +6,13 @@ description: >-
   landing zone; editing .proto contracts or running Define; Spanner schemas or
   protobundles; Pub/Sub event handlers; Terraform under a neuron's infra/;
   generated packages failing to resolve; playground tests; migrating legacy
-  proto imports; ADK agents. Also on explicit asks: "find a skill for …",
-  "is there a skill for …", "alis, …", "hey alis". NOT a trigger: merely being
-  inside an alis.build workspace, Makefiles and local dev tooling, generic
-  Go/JS bugs or test authoring, git operations, reading logs, or when a loaded
-  Alis skill already covers the task. Probes the local catalog first
-  (instant), loads the chosen skill, which then owns execution.
+  proto imports; ADK agents; sharing or publishing an HTML page, report,
+  dashboard, deck or file as a link (Alis artifacts). Also on explicit asks:
+  "find a skill for …", "is there a skill for …", "alis, …", "hey alis". NOT a
+  trigger: merely being inside an alis.build workspace, Makefiles and local
+  dev tooling, generic Go/JS bugs or test authoring, git operations, reading
+  logs, or when a loaded Alis skill already covers the task. Probes the local
+  catalog first (instant), loads the chosen skill, which then owns execution.
 ---
 
 # Discover — find and load the right Alis Build skill
