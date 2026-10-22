@@ -1,116 +1,81 @@
 ---
 name: frontend-preview
 description: >-
-  Show an Alis service's web frontend in a real browser beside the
-  conversation (terminal-browser, or a workstation shell's Preview pane) and
-  drive it: open the page, click through
-  it, read its console and errors, screenshot it, check a UI change. Use when
-  the user asks to see, open, preview, check or test the app, a page, a form
-  or a UI change of a service with a web frontend, or sends an element from
-  the browser. NOT for build or deploy logs, operation status, the Alis
-  console, or anything the alis CLI answers directly.
+  Show an Alis service's web frontend in a real browser and drive it with
+  your own browser tools (the Codex browser, a Playwright MCP, or a
+  workstation shell's Chrome pane): open the page, click through it, read
+  its console and errors, screenshot it, check a UI change. Use when the user
+  asks to see, open, preview, check or test the app, a page, a form or a UI
+  change of a service with a web frontend, or sends a note about a page
+  element. NOT for build or deploy logs, operation status, the Alis console,
+  or anything the alis CLI answers directly.
 ---
 
 # Frontend preview: see and drive a service's page
 
-terminal-browser draws a real Chromium in a terminal pane. You open it beside
-the conversation, the user watches it, and you drive it.
+The `alis` CLI only says where the page is. You open it in the browser your
+own tools drive, the user watches that browser, and you drive it. Nothing is
+installed or launched for this.
 
-Run `terminal-browser` commands with escalated permissions, as `alis` already
-runs: the sandbox blocks the calls terminal-browser makes to find the terminal
-pane this Codex session runs in.
-
-## 1. Open it
+## 1. Find the address
 
 1. The dev server must answer. `alis run` stays in the foreground, so if it
    is not running, ask the user to start it in another pane of the service
    folder (inside herdr, a split beside this one) and wait until it listens.
 2. Run `alis preview --json` in the service folder, or
-   `alis --cwd <service folder> preview --json` from elsewhere. It opens the
-   service's `.claude/launch.json` port, else the Makefile's `APP_URL`, else a
-   Vite app's configured port, else `localhost:8080`. Pass `--port <n>` or `--url <address>` when you know better
-   (a Vite server on 5173, a route such as `/checkout`).
-3. Dev server on a workstation, agent on this laptop: run
-   `alis preview --ssh alis-<org>-<id> --port <n> --json`. The browser stays
-   here and its traffic goes through the workstation, so `localhost` is the
-   workstation's. `alis workstation list --json` gives the id.
+   `alis --cwd <service folder> preview --json` from elsewhere. It resolves
+   the service's `.claude/launch.json` port, else the Makefile's `APP_URL`,
+   else a Vite app's configured port, else `localhost:8080`. Pass `--port <n>`
+   or `--url <address>` when you know better (a Vite server on 5173, a route
+   such as `/checkout`).
 
 Read the result:
 
-- `opened: true`: the page is beside the conversation. Go to step 2.
+- `url` with no workstation fields: a laptop. Go to step 2 with that address.
 - `preview_pane: true`: this is a workstation whose shell has a browser
-  Preview pane, showing the browser your `playwright` MCP tools drive. Open
-  the result's `url` with `browser_navigate` and drive it with the same tools
+  Chrome pane, showing the browser your `playwright` MCP tools drive. Open
+  `url` with `browser_navigate` and drive it with the same tools
   (`browser_snapshot`, `browser_click`, `browser_type`,
-  `browser_console_messages`, `browser_take_screenshot`), not
-  `terminal-browser`; skip step 2. If the person is not watching, pass on the
-  `hint`: they click Preview in the browser shell (`shell_url`). Leave the
-  page open when you finish.
-- `workstation_url`: this machine is a workstation, whose browser terminal
-  cannot draw the browser. Give the user that address and the `hint`. Do not retry.
+  `browser_console_messages`, `browser_take_screenshot`). If the person is
+  not watching, pass on the `hint`: they click Chrome in the browser shell's top bar
+  (`shell_url`). On a sign-in page call `preview_wait_for_person` from the
+  `alis-preview` MCP and carry on once they press Continue. Leave the page
+  open when you finish.
+- `workstation_url` without `preview_pane`: an older workstation image. Give
+  the user that address and the `hint`; open it with your own browser tools
+  if you have any.
 - `guessed: true`: no frontend or port was found, so the page may not answer.
   Tell the user which address you tried.
-- `warnings`: pass them on. herdr older than 0.9.1 shows the page only after
-  the user clicks into its pane; `herdr update --handoff` fixes that.
-- `TERMINAL_BROWSER_NOT_FOUND`: ask the user before installing (the envelope's
-  `agent` field has the command). Meanwhile give them the address.
 - `unknown command "preview"`: this CLI predates `alis preview`. Suggest
-  `alis upgrade`, and meanwhile run
-  `terminal-browser open --split right http://localhost:<port>` yourself, with
-  the port from the service's `.claude/launch.json` or the dev server's output.
-- `PREVIEW_FAILED`: usually a terminal that cannot draw kitty graphics or
-  cannot split (iTerm2, a workstation's browser terminal). Suggest Ghostty,
-  kitty, WezTerm, tmux or herdr, and give the user the address.
+  `alis upgrade`, and meanwhile take the port from the service's
+  `.claude/launch.json` or the dev server's output.
 
-## 2. Drive it
+## 2. Drive it with your browser tools
 
-Use `terminal-browser action -- <command>`. The `terminal-browser` skill has
-the full command reference.
+Use whichever browser tools this session has; do not install any.
 
-- `terminal-browser action -- snapshot -i` lists the interactive elements as
-  `@e1`, `@e2` refs. A ref only exists inside the one `terminal-browser action`
-  call that took the snapshot, so act in that same call:
-  `terminal-browser action -- batch "snapshot -i" "click @e2"`. Refs stay the
-  same while the page does not change.
-- Or act by locator, one call each: `find role button click --name "Save"`,
-  `find label Email fill "a@b.co"`, `click "button.primary"`, `press Enter`,
-  `open <url>`, `reload`.
-- `console`, `errors` and `network requests` show what went wrong.
-- `screenshot --annotate <path>` when layout matters; then read the image.
-- Always finish with `terminal-browser action done`, which clears the
-  "agent is driving" glow the user sees.
+- **Codex browser** (the browser tool Codex ships with, when it is on):
+  open the address, take a snapshot, click and type by element, read the
+  console, and screenshot when layout matters. The user's own browser shows
+  the page as you work.
+- **Playwright MCP** (`browser_*`): `browser_navigate`, `browser_snapshot`,
+  `browser_click`, `browser_type`, `browser_console_messages`,
+  `browser_take_screenshot`.
+- **No browser tools at all**: give the user the address to open, and ask
+  them what they see; do not try to drive a browser from the shell.
 
 ## 3. Close it only when asked
 
-Leave the preview open when you finish; the user keeps watching it. Close it
-only when the user asks, and only this way:
-
-- Inside herdr, close the pane: `terminal-browser ls --json` gives this
-  browser's pane id (`browsers[].pane.pane`, such as `w5:p11`), and
-  `herdr pane close <id>` closes the pane and the browser with it.
-- Elsewhere (a Ghostty split), `terminal-browser action -- tab close` closes
-  the page, but closing the last tab leaves a blank tab open. Tell the user
-  to close the split themselves.
-- To close one of several tabs, `terminal-browser action -- tab close <id>`
-  (`terminal-browser ls` lists the ids).
-- Never `terminal-browser action -- close`: it prints "Browser closed" but
-  only disconnects you, and the browser stays open.
-- Never `terminal-browser shutdown`, and never kill the `pid` that `ls`
-  reports: that pid is the daemon behind every browser on the machine, so
-  both close other sessions' browsers too.
+Leave the tab open when you finish; the user keeps looking at it. Close only
+the tab you opened, never the user's other tabs or their browser.
 
 ## 4. The user points at something
 
-The user can select an element in the browser and send it to you (ctrl+g, or
-right-click and "send to agent"). It arrives as a message starting with `> `
-that describes the element, with its source file for React dev builds. Treat
-it as the thing to change: find it in the code, change it, then reload the
-page and check the result.
-
-Inside herdr the user can also press `prefix+f` to open the same preview
-beside any pane. A workstation shell's Preview pane sends the same kind of
-message from its Annotate button; check the result there with your
-`playwright` tools.
+A workstation shell's Chrome pane has an Annotate button that sends you one
+line starting with `> [preview]`, describing the element, with its source
+file for React dev builds and a screenshot path. Treat it as the thing to
+change: find it in the code, change it, then reload the page and check the
+result in the same browser.
 
 ## Not for
 
