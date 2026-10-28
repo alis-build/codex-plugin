@@ -1,4 +1,7 @@
-# Alis Build Codex Plugin
+# Alis Build plugin for Codex
+
+This prepared update aligns terminology and artifact reading with the coordinated
+CLI copy pass (proposed CLI 1.174.2). Publish the CLI and plugins together.
 
 <p align="center">
   <img src="plugins/tools/assets/connectivity.svg" alt="Codex connected to Alis Build" width="760">
@@ -8,14 +11,14 @@
   <strong>Connect Codex to Alis Build.</strong>
 </p>
 
-Use this plugin to let Codex work with Alis Build organisations, products, neurons, builds, and deploys through the `alis` CLI, with workspace-aware context injected into every session.
+Use this plugin to let Codex work with build environments, products, services, builds, and deploys through the `alis` CLI, with workspace-aware context injected into every session.
 
 ## What You Get
 
 - A workspace-gated Define → Build → Deploy primer: the full primer inside an `alis.build` workspace, a compressed digest elsewhere when the `alis` CLI is installed, and zero tokens on unrelated projects
-- Quiet, local-first skill discovery: a `discover` skill that fires on platform-shaped work (never on generic coding just because you are inside a workspace), probes the local catalog in ~40ms, and loads the right registry skill; plus a `capture` skill that saves just-completed work as a reusable team skill
+- Quiet, local-first skill discovery: a `discover` skill that fires on platform-shaped work (never on generic coding just because you are inside a workspace), probes the local catalogue in ~40ms, and loads the right registry skill; plus a `capture` skill that saves just-completed work as a reusable team skill
 - Confidence-gated per-prompt skill suggestions (a `UserPromptSubmit` hook backed by `alis skills suggest`) — a suggestion appears only when the match is distinctive; wake phrases (`alis, …`, `capture this as a skill`) route from any directory
-- Catalog metadata refreshed quietly when a new session starts; the plugin never installs or prunes native user skills
+- Catalogue metadata refreshed quietly when a new session starts; the plugin never installs or prunes native user skills
 - Workspace-aware context injection through Codex hooks
 - The `alis` CLI runnable without per-command approval prompts (with destructive commands double-keyed)
 
@@ -25,7 +28,7 @@ You need:
 
 - Codex CLI or the Codex IDE extension
 - The `alis` CLI installed, on your `PATH`, and signed in (`alis login`)
-- An Alis Build account with access to the organisations and products you want to use
+- An Alis Build account with access to the build environments and products you want to use
 
 ## Install
 
@@ -48,15 +51,15 @@ capture this as a skill
 ```
 
 ```text
-Use Alis Build to list the organisations I can access.
+Use Alis Build to list the build environments I can access.
 ```
 
 ```text
-Show recent builds for product os in organisation alis.
+Show recent builds for product os in build environment alis.
 ```
 
 ```text
-Review the latest deploy logs for this neuron and suggest the next action.
+Review the latest deploy logs for this service and suggest the next action.
 ```
 
 Codex runs these through the `alis` CLI without asking for approval on every command.
@@ -65,8 +68,8 @@ Codex runs these through the `alis` CLI without asking for approval on every com
 
 This plugin includes Alis Build workflow skills:
 
-- **`discover`** — finds and loads the right Alis Build skill for platform-shaped work. It fires on your own words (Codex routes on the skill's description) when the task touches the platform — proto contracts, neurons, Define/Build/Deploy, Spanner, Pub/Sub, ADK agents — but not on generic coding (Makefiles, ordinary bugs, tests, git) just because you are inside a workspace. It probes the local catalog first (`alis skills suggest --json`, ~40ms, no network), loads a skill only on a distinctive match, and hands execution to it; the registry search (`alis skills search`) is reserved for explicit "find me a skill" asks. No match means silence — it never narrates discovery that found nothing.
-- **`capture`** — turns work just completed in the session into a reusable team skill ("capture this as a skill"): dedupe against the registry, register a draft with `alis skills capture`, distill generalized steps, and publish on your approval.
+- **`discover`** — finds and loads the right Alis Build skill for platform-shaped work. It fires on your own words (Codex routes on the skill's description) when the task touches the platform — proto contracts, services, Define/Build/Deploy, Spanner, Pub/Sub, ADK agents — but not on generic coding (Makefiles, ordinary bugs, tests, git) just because you are inside a workspace. It probes the local catalogue first (`alis skills suggest --json`, ~40ms, no network), loads a skill only on a distinctive match, and hands execution to it; the registry search (`alis skills search`) is reserved for explicit "find me a skill" asks. No match means silence — it never narrates discovery that found nothing.
+- **`capture`** — turns work just completed in the session into a reusable team skill ("capture this as a skill"): dedupe against the registry, register a draft with `alis skills capture`, distill generalised steps, and publish on your approval.
 - **`frontend-preview`** — shows a service's web frontend in the browser Codex's own tools drive and checks it there (`alis preview --json` for the address, then the Codex browser or a Playwright MCP to snapshot, click, fill and read the console in your own browser). The CLI installs and launches nothing; on a workstation the shell's Preview pane shows the browser the agent drives. Never used for logs or operation status.
 - **`getting-started`** — a guided Alis Build setup and optional quickstart:
 
@@ -97,7 +100,7 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   workspace the hook runs on every prompt; elsewhere a cheap prefilter skips prompts that
   cannot contain a wake phrase (set `ALIS_SUGGEST_ALWAYS=1` to disable the prefilter). Silent
   on every failure path — a missing or failing `alis` CLI never breaks a prompt.
-- **Skills catalog refresh.** On `startup`, a `SessionStart` hook runs
+- **Skills catalogue refresh.** On `startup`, a `SessionStart` hook runs
   `alis skills sync --cache-only` through Codex's managed background-hook support. The CLI uses
   its 24-hour cache, and this explicit compatibility flag ensures older CLIs also refresh metadata
   only—native user skills are never installed or pruned. Resume, clear, and compact events do not
@@ -133,14 +136,14 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   `~/.codex/rules/default.rules` if you also approved it interactively). The approval-record hook
   independently excludes every `blocks|block uninstall` flag permutation from automatic standing
   grants. Production stays safe
-  regardless — the CLI itself refuses to deploy to a production environment
+  regardless — the CLI itself refuses to deploy to a production deployment environment
   (exit code 3) until re-run with `--confirm-production`, which the agent is instructed to add only
   after your explicit approval (`alis docs safety`). Use one standalone `alis <command> … --json` invocation per tool call, with the
   working directory passed separately. Complex shell wrappers may be reviewed as a whole
   and will not reliably match the `alis` prefix rule.
 - **Approval record for the alis CLI.** A `PreToolUse` hook on the shell tool records each clean,
-  single `alis …` invocation at `~/.alis/agent-approval.json` (harness `codex`, the session's
-  permission mode, session id, and exact command). It is an observer only — execpolicy owns shell
+  single `alis …` invocation at `~/.alis/agent-approval.json` (coding agent `codex`, the session's
+  permission mode, session ID, and exact command). It is an observer only — execpolicy owns shell
   approval — and lets the alis CLI treat a fresh record from the same `CODEX_THREAD_ID` in
   `acceptEdits`, `dontAsk`, or `bypassPermissions` mode as a standing grant for non-production
   approvals. Destructive block uninstalls and the commands that print or write environment
@@ -151,7 +154,7 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   `--confirm-production`.
 - **Production approval in Codex.** The `guard-production.sh` hook reminds the agent
   to obtain explicit approval for the prepared, pinned deployment, or, when the command carries
-  `--reveal`, for revealing a production environment's secret values. After you approve that
+  `--reveal`, for revealing a production deployment environment's secret values. After you approve that
   deployment in Codex, the agent executes it and verifies its operation. The hook cannot
   inspect conversational consent and emits neither `allow` nor `deny`; it is a reminder,
   not a technical attestation of approval. The CLI still exits 3 without
@@ -175,19 +178,19 @@ Hooks are enabled by default in Codex. If you have disabled them globally, re-en
 
 `plugins/tools/context/dbd-primer.md` and `plugins/tools/context/dbd-digest.md` are synced
 from the canonical primer and digest in the Alis Build Claude Code plugin
-(`claude-plugin/plugins/alis-build/context/`). The local differences are harness adaptations
+(`claude-plugin/plugins/alis-build/context/`). The local differences are coding agent adaptations
 only: the Skills sections name this plugin's `discover` / `capture` skills instead of
 Claude's `alis:*` skills, and the primer gate reads Codex's hook environment
 (`PLUGIN_ROOT`, `CODEX_PROJECT_DIR`). Lifecycle routing lives in `hooks.json`: primer and
 service context run for `startup`, `resume`, `clear`, and `compact`, while rule installation
-and catalog refresh run only on `startup`. Sync the bodies on each claude-plugin primer release.
+and catalogue refresh run only on `startup`. Sync the bodies on each claude-plugin primer release.
 `hooks/warn-secrets.sh` and `hooks/secrets-hook.py` are verbatim copies of the Claude plugin's
 shell-path secrets warning (`claude-plugin/plugins/alis-build/hooks/`); sync them together with
 the primer, and keep `hooks/warn-secrets.test.sh` in step with that plugin's samples.
 
-## Ticket reading and package setup
+## Conversation reading and package setup
 
-Read referenced support tickets before proposing changes: use
+Read referenced conversations before proposing changes: use
 `alis specialist get tickets/ID --json`, or find the title with
 `alis specialist tickets --state all --json`. Use `alis packages install`
 for private package setup during Build. Read command results and help in full.

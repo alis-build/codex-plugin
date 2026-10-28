@@ -63,7 +63,7 @@ emit_protos() {  # list top-level *.proto basenames in $1, if any
 
 if [ "$side" = "build" ]; then
   printf 'This Codex session is inside an Alis Build service implementation (build) directory.\n'
-  [ -n "$pkg" ] && printf '  Package id:  %s\n' "$pkg"
+  [ -n "$pkg" ] && printf '  Package ID:  %s\n' "$pkg"
   if [ -d "$definedir" ]; then
     printf '  The protobuf definitions (the API contract — the DBD "Define" step) are available here:\n    %s\n' "$definedir"
     emit_protos "$definedir"
@@ -72,7 +72,7 @@ if [ "$side" = "build" ]; then
   fi
 else  # define side
   printf 'This Codex session is inside an Alis Build definitions (define) directory — the protobuf API contract.\n'
-  [ -n "$pkg" ] && printf '  Package id:  %s\n' "$pkg"
+  [ -n "$pkg" ] && printf '  Package ID:  %s\n' "$pkg"
   # The session may have started below the version root (for example in a
   # docs/ or generated/ child). Always enumerate the service's contract root.
   emit_protos "$definedir"

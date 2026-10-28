@@ -1,6 +1,6 @@
 {
   "name": "tools",
-  "version": "0.30.0",
+  "version": "0.30.1",
   "description": "Connect Codex to Alis Build through the alis CLI and workspace context.",
   "author": {
     "name": "Alis Build"

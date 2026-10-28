@@ -21,7 +21,7 @@ IDE and desktop app sessions need a verified CLI registration.
    and is not copied; or (b) connect this app to handoff first: run `codex` in a terminal
    in this folder, open `/hooks`, trust the Alis Build hooks (the approval is shared with
    the desktop app), start a new thread and ask again. Never show state file names, never
-   invent a session id, never create or switch workstations on the user's behalf.
+   invent a session ID, never create or switch workstations on the user's behalf.
 3. Native cross-machine resume for codex is not enabled in this release. Tell the user,
    in both halves, that the handoff starts a **new conversation** with continuation
    context on their **existing workstation `<alias>`** (no new workstation), and obtain

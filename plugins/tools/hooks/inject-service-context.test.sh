@@ -28,12 +28,12 @@ expect_contains() { # $1=name $2=output $3=needle
 }
 
 build_out="$(run_hook "$build_nested")"
-expect_contains "nested build package" "$build_out" "Package id:  acme.payments.ledger.v1"
+expect_contains "nested build package" "$build_out" "Package ID:  acme.payments.ledger.v1"
 expect_contains "nested build counterpart" "$build_out" "$define_root"
 expect_contains "nested build protos" "$build_out" "Proto files: ledger.proto, reporting.proto"
 
 define_out="$(run_hook "$define_nested")"
-expect_contains "nested define package" "$define_out" "Package id:  acme.payments.ledger.v1"
+expect_contains "nested define package" "$define_out" "Package ID:  acme.payments.ledger.v1"
 expect_contains "nested define counterpart" "$define_out" "$build_root"
 expect_contains "nested define root protos" "$define_out" "Proto files: ledger.proto, reporting.proto"
 

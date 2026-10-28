@@ -2,9 +2,9 @@
 name: discover
 description: >-
   Find and load the right Alis Build skill from the registry. Use when the
-  task is platform-shaped: creating or changing a product, neuron, block, or
-  landing zone; editing .proto contracts or running Define; Spanner schemas or
-  protobundles; Pub/Sub event handlers; Terraform under a neuron's infra/;
+  task is platform-shaped: creating or changing a product, service, code block, or
+  build environment; editing .proto contracts or running Define; Spanner schemas or
+  protobundles; Pub/Sub event handlers; Terraform under a service's infra/;
   generated packages failing to resolve; playground tests; migrating legacy
   proto imports; ADK agents; sharing or publishing an HTML page, report,
   dashboard, deck or file as a link (Alis artifacts). Also on explicit asks:
@@ -12,7 +12,7 @@ description: >-
   trigger: merely being inside an alis.build workspace, Makefiles and local
   dev tooling, generic Go/JS bugs or test authoring, git operations, reading
   logs, or when a loaded Alis skill already covers the task. Probes the local
-  catalog first (instant), loads the chosen skill, which then owns execution.
+  catalogue first (instant), loads the chosen skill, which then owns execution.
 ---
 
 # Discover — find and load the right Alis Build skill
