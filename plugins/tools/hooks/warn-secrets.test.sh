@@ -9,6 +9,14 @@ hook="$dir/warn-secrets.sh"
 test_home="$(mktemp -d)"
 trap 'rm -rf "$test_home"' EXIT
 
+if [ -z "${ALIS_TEST_CLI:-}" ]; then
+  echo 'skip: set ALIS_TEST_CLI to run native warning integration (CLI unit tests own scanner behavior)'
+  exit 0
+fi
+mkdir -p "$test_home/bin"
+ln -s "$ALIS_TEST_CLI" "$test_home/bin/alis"
+export PATH="$test_home/bin:$PATH"
+
 stripe="sk_live_$(printf 'FAKE%.0s' 1 2 3 4 5)0000"
 linear="lin_api_FAKEFAKEFAKEFAKEFAKE0000"
 

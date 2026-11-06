@@ -1,8 +1,5 @@
 # Alis Build plugin for Codex
 
-This prepared update aligns terminology and artifact reading with the coordinated
-CLI copy pass (proposed CLI 1.174.2). Publish the CLI and plugins together.
-
 <p align="center">
   <img src="plugins/tools/assets/connectivity.svg" alt="Codex connected to Alis Build" width="760">
 </p>
@@ -184,10 +181,9 @@ Claude's `alis:*` skills, and the primer gate reads Codex's hook environment
 (`PLUGIN_ROOT`, `CODEX_PROJECT_DIR`). Lifecycle routing lives in `hooks.json`: primer and
 service context run for `startup`, `resume`, `clear`, and `compact`, while rule installation
 and catalogue refresh run only on `startup`. Sync the bodies on each claude-plugin primer release.
-`hooks/warn-secrets.sh` and `hooks/secrets-hook.py` are verbatim copies of the Claude plugin's
-shell-path secrets warning (`claude-plugin/plugins/alis-build/hooks/`); sync their
-`run-python.sh` launcher too, retaining its required-runtime mode for handoff, together with
-the primer, and keep `hooks/warn-secrets.test.sh` in step with that plugin's samples.
+`hooks/warn-secrets.sh` calls the native CLI scanner. Warning patterns and
+host response adapters are maintained in the CLI instead of copied Python
+files. Publish the CLI with hook protocol 1 before this plugin release.
 
 ## Conversation reading and package setup
 
@@ -203,16 +199,12 @@ For immediate guidance, read `alis docs specialist` and
 
 ## Troubleshooting
 
-On Windows, a Microsoft Store `python3` shortcut can exist even when it
-cannot run Python. The plugin checks for a working Python 3.9+ using
-`python3`, `python`, then `py -3`. Unusable shortcuts are skipped quietly.
-
-Without a supported Python runtime, handoff registration is unavailable and
-ordinary sessions remain quiet. Secret warnings are also unavailable. An existing
-source handoff claim still pauses local work: restore Python and check
-`alis workstation handoff status` before continuing. If `jq` is also missing,
-the plugin conservatively pauses while any claim for this agent exists.
-Restart the application after changing Python's PATH or updating the plugin.
+The plugin uses native hook protocol 1 in the `alis` binary. Upgrade the CLI
+first with `alis upgrade`; `alis hooks capabilities` must report `"protocol":1`.
+Restart the coding agent after updating. Python is not a runtime dependency.
+Older CLIs receive one startup upgrade notice; optional native checks wait for
+the upgrade, and existing handoff claims remain fenced by the compatibility
+adapter. Bash and `jq` are still used by the other plugin hooks.
 
 If the primer or hooks do not take effect, confirm that the plugin install completed successfully:
 
@@ -276,3 +268,9 @@ machines, enrolled SSH and independent destination authentication. Use
 `alis workstation handoff status <id> --watch --json`, `open <id>`, or `cancel <id>`.
 Preserve exact Alis operation IDs and continue monitoring them rather than
 restarting a Define, Build or Deploy. Original local files and history remain.
+
+## Native hook development checks
+
+Run `ALIS_TEST_CLI=/absolute/path/to/alis-dev python3 -B tests/test_native_hooks.py`
+to check the bridges against a built CLI with Python absent from the hook PATH.
+Python is only a development test runner. Native handler tests live in the CLI.

@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
-# Warns when a tool call carries secret-looking values; never redacts.
-# Runs on every tool result, so Python only starts when the payload holds a
-# trigger of some pattern in secrets-hook.py (or an alis environment command,
-# whose revealed rows have no trigger of their own).
+# The CLI owns payload parsing, policy and native replies. Older CLIs leave
+# optional decisions to the host; check-cli.sh reports the required upgrade.
 set -eu
-payload=$(cat 2>/dev/null) || exit 0
-printf '%s' "$payload" | grep -qiE 'sk_(live|test)_|gh[oprsu]_|github_pat_|npm_|pypi-|lin_api_|SG\.|://|AKIA|AIza|xox[abpr]-|PRIVATE KEY|SECRET|TOKEN|PASSW|API_?KEY|alis (--\S+ )*(environment|environments|envs?) ' || exit 0
-hook_dir=$(dirname "$0")
-printf '%s' "$payload" | "$hook_dir/run-python.sh" "$hook_dir/secrets-hook.py"
+hook_dir=$(cd "$(dirname "$0")" && pwd)
+alis hooks run --protocol 1 --harness codex --handler secrets --plugin-root "$hook_dir/.." 2>/dev/null || true
