@@ -185,7 +185,8 @@ Claude's `alis:*` skills, and the primer gate reads Codex's hook environment
 service context run for `startup`, `resume`, `clear`, and `compact`, while rule installation
 and catalogue refresh run only on `startup`. Sync the bodies on each claude-plugin primer release.
 `hooks/warn-secrets.sh` and `hooks/secrets-hook.py` are verbatim copies of the Claude plugin's
-shell-path secrets warning (`claude-plugin/plugins/alis-build/hooks/`); sync them together with
+shell-path secrets warning (`claude-plugin/plugins/alis-build/hooks/`); sync their
+`run-python.sh` launcher too, retaining its required-runtime mode for handoff, together with
 the primer, and keep `hooks/warn-secrets.test.sh` in step with that plugin's samples.
 
 ## Conversation reading and package setup
@@ -201,6 +202,17 @@ For immediate guidance, read `alis docs specialist` and
 `alis packages install --help`.
 
 ## Troubleshooting
+
+On Windows, a Microsoft Store `python3` shortcut can exist even when it
+cannot run Python. The plugin checks for a working Python 3.9+ using
+`python3`, `python`, then `py -3`. Unusable shortcuts are skipped quietly.
+
+Without a supported Python runtime, handoff registration is unavailable and
+ordinary sessions remain quiet. Secret warnings are also unavailable. An existing
+source handoff claim still pauses local work: restore Python and check
+`alis workstation handoff status` before continuing. If `jq` is also missing,
+the plugin conservatively pauses while any claim for this agent exists.
+Restart the application after changing Python's PATH or updating the plugin.
 
 If the primer or hooks do not take effect, confirm that the plugin install completed successfully:
 
