@@ -14,7 +14,8 @@ Use this plugin to let Codex work with build environments, products, services, b
 
 - A workspace-gated Define → Build → Deploy primer: the full primer inside an `alis.build` workspace, a compressed digest elsewhere when the `alis` CLI is installed, and zero tokens on unrelated projects
 - Quiet, local-first skill discovery: a `discover` skill that fires on platform-shaped work (never on generic coding just because you are inside a workspace), probes the local catalogue in ~40ms, and loads the right registry skill; plus a `capture` skill that saves just-completed work as a reusable team skill
-- Wake phrases (`alis, …`, `capture this as a skill`) route to skill discovery or capture from any directory (a `UserPromptSubmit` hook backed by `alis skills suggest --hook`); in plan mode, a skill the Skill store ranks as a match for the request is noted beside the prompt (needs `alis` 1.187.15 or later). The CLI's local word-overlap guesses are dropped, because matching whole prompts suggested unrelated skills too often
+- Wake phrases (`alis, …`, `capture this as a skill`) route to skill discovery or capture from any directory (a `UserPromptSubmit` hook backed by `alis skills suggest --hook`)
+- A skill the Skill store ranks as a match for your request is noted beside the prompt, so Codex can load it: one skill at most, up to three in plan mode, and nothing when no skill fits (the same hook; needs `alis` 1.187.18 or later, and with an older `alis` only plan mode is covered). It costs each prompt most of a second and sends the prompt text to the Skill store; `ALIS_SUGGEST_ALWAYS=0` keeps it to wake phrases and plan mode. The CLI's local word-overlap guesses are dropped, because matching whole prompts suggested unrelated skills too often
 - Catalogue metadata refreshed quietly when a new session starts; the plugin never installs or prunes native user skills
 - Workspace-aware context injection through Codex hooks
 - The `alis` CLI runnable without per-command approval prompts (with destructive commands double-keyed)
@@ -88,14 +89,15 @@ This plugin ships Codex hooks that keep sessions grounded in the Alis Build work
   nothing — unrelated projects pay zero tokens. Set `ALIS_PRIMER=full|digest|off` to override
   the gate. Codex runs it for `startup`, `resume`, `clear`, and `compact`, so context is restored
   whenever a session is opened or its model context is rebuilt.
-- **Wake phrases and plan-mode skill matches.** A `UserPromptSubmit` hook pipes the prompt's
+- **Wake phrases and Skill store matches.** A `UserPromptSubmit` hook pipes the prompt's
   payload to `alis skills suggest --hook --harness codex`, which prints plain-text context or
   nothing. Wake phrases ("alis, …", "capture this as a skill") yield deterministic routing
-  instructions and work from any directory. In plan mode every prompt reaches the CLI, which
-  asks the Skill store to rank the request (about a second at most) and notes a match beside
-  the prompt, so the plan can use a skill your team already has. Outside plan mode a cheap
-  prefilter skips prompts that cannot contain a wake phrase (set `ALIS_SUGGEST_ALWAYS=1` to
-  disable it). The CLI's local word-overlap guesses ("Possibly relevant Alis skill") are
+  instructions and work from any directory. Every other prompt reaches the CLI too, which
+  asks the Skill store to rank it once it passes the CLI's gates (about a second at most) and
+  notes a match beside the prompt, so Codex can use a skill your team already has. The note
+  asks Codex to name the skill even when it answers without loading it. Set
+  `ALIS_SUGGEST_ALWAYS=0` to ask only for prompts that could hold a wake phrase, and in plan
+  mode. The CLI's local word-overlap guesses ("Possibly relevant Alis skill") are
   dropped in every mode. Silent on every failure path — a missing or failing `alis` CLI never
   breaks a prompt.
 - **Skills catalogue refresh.** On `startup`, a `SessionStart` hook runs
