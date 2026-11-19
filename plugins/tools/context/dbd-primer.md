@@ -151,9 +151,14 @@ directory.
   page", "send them a link", "publish this HTML", "password-protect it", "put this
   static page on Cloud Run", or an editor artifact link to "make an Alis artifact
   of": `alis artifacts create <folder> --title … --publish [--password-file <f> |
-  --emails …] --json` returns a branded link to a private, versioned artifact —
-  open, password, verified-email or expiring. Bundle every asset locally (no CDNs,
-  no server); Cloud Run is only for pages that need a backend (`alis docs artifacts`).
+  --emails …] --json` checks the page, uploads it and returns the link to a private,
+  versioned artifact — open, password, verified-email or expiring — in one run;
+  without `--publish` it stays private and the result has a `previewUrl`. Its pages
+  are served in the account's brand: link the hosted fonts and tokens and style with
+  their roles (`alis artifacts design --json`), never brand colours, fonts or a
+  copied logo; `--no-brand` keeps a supplied design as it is. Bundle every asset
+  locally (no CDNs, no server); Cloud Run is only for pages that need a backend
+  (`alis docs artifacts`).
 - **Ideate context by reference.** When a conversation references an Alis Ideate project
   (`ideas/<id>`), run `alis ideate context <id>` first — one markdown document with
   everything the project holds; dig with `alis ideate artifacts read`, `alis ideate contribution` and `alis ideate find`
